@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Thor Simulator</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0d0f14; color:#c8cdd8; font-family:'JetBrains Mono','Courier New',monospace; display:flex; height:100vh; overflow:hidden; }
+#viewport { flex:1; position:relative; }
+canvas { display:block; }
+#panel { width:270px; background:#13151c; border-left:1px solid #1e2230; display:flex; flex-direction:column; padding:18px 14px; gap:14px; overflow-y:auto; }
+.ptitle { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#3a4468; margin-bottom:3px; }
+#status-row { display:flex; align-items:center; gap:8px; font-size:12px; }
+#sdot { width:8px;height:8px;border-radius:50%;background:#222;flex-shrink:0;transition:background .3s; }
+#sdot.on  { background:#3de88a; box-shadow:0 0 6px #3de88a88; }
+#sdot.err { background:#e84b3d; box-shadow:0 0 6px #e84b3d88; }
+#ws-row { display:flex; gap:6px; }
+#ws-url { flex:1;background:#1a1e28;border:1px solid #2a3050;border-radius:4px;color:#c8cdd8;font-family:inherit;font-size:11px;padding:5px 8px;outline:none; }
+#ws-url:focus { border-color:#3a5acc; }
+#ws-btn { background:#1a2448;border:1px solid #2a3a70;border-radius:4px;color:#8899dd;font-family:inherit;font-size:11px;padding:5px 10px;cursor:pointer; }
+#ws-btn:hover { background:#243460; }
+.jrow { display:flex; flex-direction:column; gap:3px; margin-bottom:5px; }
+.jhdr { display:flex; justify-content:space-between; font-size:11px; }
+.jname { color:#506090; } .jval { color:#c8cdd8; min-width:52px; text-align:right; }
+.jlock { color:#333a50; }
+.jbar { height:3px;background:#1a1e2a;border-radius:2px;position:relative; }
+.jfill { height:100%;border-radius:2px;background:#3a5acc;position:absolute;transition:width .07s linear; }
+.jfill.live { background:#3de88a; }
+.cgrid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px; }
+.ccell { background:#181c26;border:1px solid #1e2230;border-radius:4px;padding:5px 7px;text-align:center; }
+.cax { font-size:9px;color:#3a4468;letter-spacing:.1em; }
+.cnum { font-size:13px;color:#7a90cc; }
+#log { font-size:10px;color:#2e3850;height:48px;overflow-y:auto;line-height:1.6; }
+#log span{display:block;} #log .ok{color:#3de88a66;} #log .err{color:#e84b3d66;}
+#demo-sliders{display:none;flex-direction:column;gap:8px;margin-top:8px;}
+input[type=range]{width:100%;accent-color:#3a5acc;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="viewport"></div>
+<div id="panel">
+  <div>
+    <div class="ptitle">Thor Arm Simulator</div>
+    <div style="font-size:10px;color:#252d48;margin-top:2px;">spin · (locked) · elbow · spin · elbow · grip</div>
+  </div>
+  <div>
+    <div class="ptitle">WebSocket</div>
+    <div id="ws-row">
+      <input id="ws-url" value="ws://localhost:8765">
+      <button id="ws-btn" onclick="connectWS()">Connect</button>
+    </div>
+    <div id="status-row" style="margin-top:8px;">
+      <div id="sdot"></div><span id="stxt">disconnected</span>
+    </div>
+  </div>
+  <div><div class="ptitle">Joint Angles</div><div id="jrows" style="margin-top:6px;"></div></div>
+  <div>
+    <div class="ptitle">TCP Position (mm)</div>
+    <div class="cgrid" style="margin-top:6px;">
+      <div class="ccell"><div class="cax">X</div><div class="cnum" id="tx">0</div></div>
+      <div class="ccell"><div class="cax">Y</div><div class="cnum" id="ty">0</div></div>
+      <div class="ccell"><div class="cax">Z</div><div class="cnum" id="tz">0</div></div>
+    </div>
+  </div>
+  <div>
+    <div class="ptitle">Manual Demo</div>
+    <label style="font-size:11px;color:#506090;display:flex;align-items:center;gap:6px;cursor:pointer;">
+      <input type="checkbox" id="demo-chk" onchange="toggleDemo(this.checked)"> enable sliders
+    </label>
+    <div id="demo-sliders"></div>
+  </div>
+  <div>
+    <div class="ptitle">Workspace</div>
+    <label style="font-size:11px;color:#506090;display:flex;align-items:center;gap:6px;cursor:pointer;">
+      <input type="checkbox" id="ws-chk" checked onchange="toggleWorkspace(this.checked)"> show reachable area
+    </label>
+  </div>
+  <div><div class="ptitle">Log</div><div id="log" style="margin-top:4px;"></div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ── Thor structure (YOUR robot) ──────────────────────────────────────────────
+//   J1 base spin (yaw, Y)
+//   J2 shoulder pitch — LOCKED straight up
+//   J3 elbow pitch #1 (X)
+//   J4 spin (roll/torsion, Y)
+//   J5 elbow pitch #2 (X)
+//   J6 gripper spin (Y)
+//
+// Segments (scene units = mm/10):
+//   L1 base column 300mm, L2 upper arm 250mm,
+//   L3 mid-arm 120mm, L4 forearm 200mm
+// Real Thor dimensions (mm), total ~624mm. Scene units = mm/10
+const L1=20.2, L2=16.0, L3=8.0, L4=16.3;
+const D2R=Math.PI/180;
+
+const JOINTS=[
+  {name:'J1  Base Spin',    desc:'Stepper continuous',lim:[-360,360], locked:false, continuous:true},
+  {name:'J2  Shoulder',     desc:'LOCKED straight up',lim:[0,0],      locked:true },
+  {name:'J3  Elbow #1',     desc:'First bend',        lim:[-90,90],   locked:false},
+  {name:'J4  Spin',         desc:'Continuous 360 spin',lim:[-180,180], locked:false},
+  {name:'J5  Elbow #2',     desc:'Second bend',       lim:[-150,150], locked:false},
+  {name:'J6  Gripper',      desc:'Servo 0=close 90=open',lim:[0,90],   locked:false, gripper:true},
+];
+
+let angles=[0,0,0,0,0,0], demoMode=false, ws=null;
+
+// Three.js
+const viewport=document.getElementById('viewport');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(devicePixelRatio);
+renderer.shadowMap.enabled=true;
+renderer.setClearColor(0x0d0f14);
+viewport.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x0d0f14,0.006);
+const camera=new THREE.PerspectiveCamera(42,1,0.1,400);
+camera.position.set(16,28,28);
+camera.lookAt(0,14,0);
+
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.target.set(0,14,0);
+controls.enableDamping=true; controls.dampingFactor=0.08;
+
+const amb=new THREE.AmbientLight(0x1a2040,3); scene.add(amb);
+const key=new THREE.DirectionalLight(0x7799ee,3.5);
+key.position.set(10,28,14); key.castShadow=true; key.shadow.mapSize.set(2048,2048);
+scene.add(key);
+const fill=new THREE.DirectionalLight(0x334466,1.2); fill.position.set(-10,8,-8); scene.add(fill);
+const rim=new THREE.PointLight(0x2244aa,1.5,140); rim.position.set(-8,28,-10); scene.add(rim);
+scene.add(new THREE.GridHelper(60,60,0x182030,0x12182a));
+
+const M={
+  base:new THREE.MeshPhongMaterial({color:0x111820,shininess:20}),
+  body:new THREE.MeshPhongMaterial({color:0x1e3055,shininess:70,specular:0x304888}),
+  joint:new THREE.MeshPhongMaterial({color:0x2a4575,shininess:140,specular:0x5080cc}),
+  link:new THREE.MeshPhongMaterial({color:0x182545,shininess:40}),
+  spin:new THREE.MeshPhongMaterial({color:0x2d2a60,shininess:90,specular:0x6060c0}),
+  wrist:new THREE.MeshPhongMaterial({color:0x1a3560,shininess:90}),
+  gripper:new THREE.MeshPhongMaterial({color:0x1a6080,shininess:110,specular:0x40a0cc}),
+  tcp:new THREE.MeshPhongMaterial({color:0x3de88a,emissive:0x0d4020}),
+};
+function cyl(rt,rb,h,mat,s=14){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),mat);m.castShadow=true;return m;}
+function box(w,h,d,mat){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.castShadow=true;return m;}
+function sph(r,mat){return new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat);}
+
+// ── Build arm ─────────────────────────────────────────────────────────────────
+const basePlate=box(8,0.6,8,M.base); basePlate.position.y=0.3; basePlate.receiveShadow=true; scene.add(basePlate);
+const baseCol=cyl(1.2,1.5,L1,M.body); baseCol.position.y=L1/2; scene.add(baseCol);
+
+// J1 base spin
+const pJ1=new THREE.Object3D(); pJ1.position.y=L1; scene.add(pJ1);
+pJ1.add(sph(1.4,M.joint));
+
+  // J2 shoulder LOCKED — upper arm goes straight up
+  const pJ2=new THREE.Object3D(); pJ1.add(pJ2);
+  // upper arm (L2) straight up
+  const upperArm=cyl(0.7,0.9,L2,M.body); upperArm.position.y=L2/2; pJ2.add(upperArm);
+
+    // J3 elbow #1 at top of upper arm
+    const pJ3=new THREE.Object3D(); pJ3.position.y=L2; pJ2.add(pJ3);
+    const j3Ring=cyl(1.1,1.1,1.4,M.joint,20); j3Ring.rotation.z=Math.PI/2; pJ3.add(j3Ring);
+
+      // mid-arm segment (L3) after first elbow
+      const midArm=cyl(0.55,0.68,L3,M.link); midArm.position.y=L3/2; pJ3.add(midArm);
+
+      // J4 spin at end of mid-arm (torsion around the segment's long axis)
+      const pJ4=new THREE.Object3D(); pJ4.position.y=L3; pJ3.add(pJ4);
+      const j4Ring=cyl(0.62,0.62,1.6,M.spin,20); pJ4.add(j4Ring);
+
+        // J5 elbow #2 — right after the spin
+        const pJ5=new THREE.Object3D(); pJ5.position.y=0.9; pJ4.add(pJ5);
+        const j5Ring=cyl(0.95,0.95,1.2,M.joint,20); j5Ring.rotation.z=Math.PI/2; pJ5.add(j5Ring);
+
+          // forearm (L4) after second elbow
+          const forearm=cyl(0.42,0.55,L4,M.link); forearm.position.y=L4/2; pJ5.add(forearm);
+
+          // J6 gripper spin at end of forearm
+          const pJ6=new THREE.Object3D(); pJ6.position.y=L4; pJ5.add(pJ6);
+          pJ6.add(sph(0.6,M.gripper));
+
+            const palm=box(4.5,0.6,1.4,M.gripper); palm.position.y=0.6; pJ6.add(palm);
+            const f1=new THREE.Object3D(); f1.position.set(1.4,0.9,0); pJ6.add(f1);
+            const f2=new THREE.Object3D(); f2.position.set(-1.4,0.9,0); pJ6.add(f2);
+            const fLen=4;
+            const fm1=cyl(0.2,0.26,fLen,M.gripper,8); fm1.position.y=fLen/2; f1.add(fm1);
+            const fm2=cyl(0.2,0.26,fLen,M.gripper,8); fm2.position.y=fLen/2; f2.add(fm2);
+            const tcpMesh=sph(0.3,M.tcp); tcpMesh.position.y=fLen+1.0; pJ6.add(tcpMesh);
+
+// TCP trace
+const tracePoints=[]; const traceGeo=new THREE.BufferGeometry();
+const traceLine=new THREE.Line(traceGeo,new THREE.LineBasicMaterial({color:0x3de88a,opacity:0.35,transparent:true}));
+scene.add(traceLine);
+let lastTCP=null;
+
+// ── Reachable workspace boundary (translucent shell) ──────────────────────────
+// Sphere segment around the shoulder (first elbow axis) showing reach limits.
+const SHOULDER_Y = (20.2+16.0);   // L1+L2 in scene units
+const REACH_OUTER = (8.0+16.3)-1.0;   // A+B
+const REACH_INNER = Math.abs(8.0-16.3)+1.5;
+const wsGroup = new THREE.Group();
+wsGroup.position.set(0, SHOULDER_Y, 0);
+scene.add(wsGroup);
+
+// Outer reach shell (partial sphere)
+const outerGeo = new THREE.SphereGeometry(REACH_OUTER, 32, 24,
+  -Math.PI*0.85, Math.PI*1.7,   // phi sweep (J1 horizontal range ~±150°)
+  Math.PI*0.15, Math.PI*0.7);   // theta (vertical band)
+const wsMat = new THREE.MeshBasicMaterial({
+  color:0x3a6acc, transparent:true, opacity:0.06, side:THREE.DoubleSide,
+});
+const outerShell = new THREE.Mesh(outerGeo, wsMat);
+wsGroup.add(outerShell);
+
+// Wireframe edge for the outer shell
+const wsWire = new THREE.Mesh(outerGeo,
+  new THREE.MeshBasicMaterial({color:0x4a7add, wireframe:true, transparent:true, opacity:0.10}));
+wsGroup.add(wsWire);
+
+// Ground circle showing horizontal reach footprint
+const ringGeo = new THREE.RingGeometry(REACH_INNER, REACH_OUTER, 48, 1,
+  -Math.PI*0.85, Math.PI*1.7);
+const ringMat = new THREE.MeshBasicMaterial({color:0x3a6acc, transparent:true, opacity:0.05, side:THREE.DoubleSide});
+const footprint = new THREE.Mesh(ringGeo, ringMat);
+footprint.rotation.x = -Math.PI/2;
+footprint.position.y = -SHOULDER_Y + 0.1;
+wsGroup.add(footprint);
+
+let showWorkspace = true;
+function toggleWorkspace(on){ showWorkspace=on; wsGroup.visible=on; }
+
+
+// Apply angles
+function applyAngles(deg){
+  pJ1.rotation.set(0,        deg[0]*D2R, 0);  // J1 spin  → Y
+  // J2 locked — no rotation
+  pJ3.rotation.set(deg[2]*D2R, 0,        0);  // J3 elbow → X
+  pJ4.rotation.set(0,        deg[3]*D2R, 0);  // J4 spin  → Y
+  pJ5.rotation.set(deg[4]*D2R, 0,        0);  // J5 elbow → X
+  // J6 is the GRIPPER SERVO (0=closed, 90=open) — open/close the fingers.
+  // Map servo angle 0..90 → finger separation.
+  const g = clamp(deg[5], 0, 90) / 90;       // 0..1
+  const base = 0.6, span = 1.6;              // closed gap → open gap
+  f1.position.x =  (base + span*g);
+  f2.position.x = -(base + span*g);
+  pJ6.rotation.set(0, 0, 0);                 // no spin
+}
+
+// UI
+const jRowsEl=document.getElementById('jrows');
+const demoEl=document.getElementById('demo-sliders');
+const fills=[];
+JOINTS.forEach((ji,i)=>{
+  const row=document.createElement('div'); row.className='jrow';
+  const lk=ji.locked?' jlock':'';
+  row.innerHTML=`<div class="jhdr"><span class="jname${lk}">${ji.name}${ji.locked?' (lock)':''}</span><span class="jval${lk}" id="jv${i}">0.0°</span></div>
+    <div class="jbar"><div class="jfill" id="jf${i}" style="width:50%"></div></div>`;
+  jRowsEl.appendChild(row);
+  fills.push(document.getElementById(`jf${i}`));
+  if(!ji.locked){
+    const ds=document.createElement('div'); ds.style.cssText='display:flex;flex-direction:column;gap:2px;';
+    ds.innerHTML=`<div style="font-size:10px;color:#3a4468;">${ji.name}</div>
+      <input type="range" min="${ji.lim[0]}" max="${ji.lim[1]}" value="0" step="1" oninput="demoSlide(${i},this.value)">`;
+    demoEl.appendChild(ds);
+  }
+});
+function demoSlide(i,v){if(demoMode)angles[i]=+v;}
+function toggleDemo(on){demoMode=on;demoEl.style.display=on?'flex':'none';}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function updateUI(){
+  JOINTS.forEach((ji,i)=>{
+    const v=angles[i];
+    if(ji.continuous){
+      // show wrapped 0-360 + turn count; bar reflects position within current turn
+      const turns=Math.floor(v/360);
+      let wrapped=v%360; if(wrapped<0)wrapped+=360;
+      document.getElementById(`jv${i}`).textContent=`${wrapped.toFixed(0)}° (${turns>=0?'+':''}${turns})`;
+      fills[i].style.width=(wrapped/360*100)+'%';
+      fills[i].classList.toggle('live',Math.abs(angles[i])>3);
+    } else {
+      const lo=ji.lim[0],hi=ji.lim[1];
+      const pct=hi>lo?((v-lo)/(hi-lo))*100:50;
+      document.getElementById(`jv${i}`).textContent=`${v.toFixed(1)}°`;
+      fills[i].style.width=clamp(pct,0,100)+'%';
+      if(!ji.locked)fills[i].classList.toggle('live',Math.abs(v)>3);
+    }
+  });
+  const wp=new THREE.Vector3(); tcpMesh.getWorldPosition(wp);
+  document.getElementById('tx').textContent=(wp.x*10).toFixed(0);
+  document.getElementById('ty').textContent=(wp.y*10).toFixed(0);
+  document.getElementById('tz').textContent=(wp.z*10).toFixed(0);
+}
+function updateTrace(){
+  const wp=new THREE.Vector3(); tcpMesh.getWorldPosition(wp);
+  if(!lastTCP||wp.distanceTo(lastTCP)>0.1){
+    tracePoints.push(wp.clone());
+    if(tracePoints.length>500)tracePoints.shift();
+    traceGeo.setFromPoints(tracePoints); lastTCP=wp.clone();
+  }
+}
+function connectWS(){
+  if(ws){ws.close();ws=null;}
+  const url=document.getElementById('ws-url').value.trim();
+  try{ws=new WebSocket(url);}catch(e){log('bad url','err');return;}
+  ws.onopen=()=>{setStatus(true,'live');log('connected','ok');};
+  ws.onclose=()=>{setStatus(false,'disconnected');ws=null;};
+  ws.onerror=()=>log('ws error','err');
+  ws.onmessage=ev=>{if(demoMode)return;try{const d=JSON.parse(ev.data);if(d.angles)for(let i=0;i<6;i++)angles[i]=d.angles[i]||0;}catch(_){}};
+}
+function setStatus(ok,txt){document.getElementById('sdot').className=ok?'on':'err';document.getElementById('stxt').textContent=txt;}
+function log(msg,cls=''){const el=document.getElementById('log');const s=document.createElement('span');s.textContent=msg;if(cls)s.className=cls;el.appendChild(s);while(el.children.length>20)el.removeChild(el.firstChild);el.scrollTop=el.scrollHeight;}
+function resize(){const w=viewport.clientWidth,h=viewport.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}
+window.addEventListener('resize',resize); resize();
+function animate(){requestAnimationFrame(animate);controls.update();applyAngles(angles);updateTrace();updateUI();renderer.render(scene,camera);}
+animate();
+log('ready — connect WS or enable manual sliders');
+</script>
+</body>
+</html>
