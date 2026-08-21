@@ -136,10 +136,6 @@ HW_SHOULDER_D_SCALE = 0.3    # D (proximal hinge, "shoulder"): same extra cut as
 MAX_ROLL_SPEED = 60.0        # deg/s in gesture space, before the HW_MAX_SPEED
                              # ceiling clamps it down for real hardware output
 
-JOG_STEP_INCREMENT = 50   # how much each "JOG step size" +/- press changes
-                          # the shared JOGSTEP value used by all axes' JOG
-                          # buttons — does not move anything by itself
-
 MOVE_ACK_TIMEOUT = 2.0   # seconds. Each MOVE blocks the firmware until it
                          # finishes, and Python won't send a new delta for
                          # that axis until "[fw] MOVE <axis> done" comes back
@@ -147,6 +143,25 @@ MOVE_ACK_TIMEOUT = 2.0   # seconds. Each MOVE blocks the firmware until it
                          # missed line split), the axis would otherwise be
                          # stuck refusing to move for the rest of the session.
                          # This unblocks it after a generous timeout instead.
+
+HOMING_ORDER = ["B", "D", "E"]   # B/C first (edge beacon, simplest/safest),
+                                  # then D (center beacon, no working hardware
+                                  # limit — this is why it goes after B, not
+                                  # first: B and E both have real backstops),
+                                  # then E (full-rotation beacon, direction-
+                                  # independent). A has no beacon yet.
+HOMING_STEP_TIMEOUT = 75.0   # seconds to wait for one "[fw] HOME <axis> ..."
+                            # completion line before giving up on the whole
+                            # sequence. D's worst case (not found going '+',
+                            # retrace, not found going '-' either) is close
+                            # to 6000 total steps — and HOME <axis> now runs
+                            # at the even-slower HOME_VMIN_US/MAX_US ramp
+                            # (4200/2600us, not the normal 3000/1800), which
+                            # puts the real worst case around 35-40 seconds.
+                            # 45s cut that too close in practice — if this
+                            # still isn't enough, check what HOME_VMIN_US/
+                            # HOME_VMAX_US actually are in the firmware
+                            # before just raising this again.
 
 PATH_DIR = Path(__file__).with_name("paths")
 
@@ -433,6 +448,11 @@ class Mark1OS:
         self.jog_step_size = 200   # mirrors firmware's default jogStepSteps —
                                    # kept in sync via set_jog_step()
 
+        # -- homing sequence state (see start_homing/_advance_homing) --
+        self.homing_queue = []     # remaining axes still to home, in order
+        self.homing_axis = None    # axis we're currently waiting on a response for
+        self.homing_sent_t = None
+
         # -- recording state --
         self.recording = False
         self.rec_start_t = 0.0
@@ -536,8 +556,19 @@ class Mark1OS:
         distrow.pack(fill="x", pady=3)
         tk.Label(distrow, text="JOG step size (all axes)", bg=PANEL, fg=INK, font=self.f_body,
                  width=22, anchor="w").pack(side="left")
-        self._flat_button(distrow, "-", lambda: self.jog_distance(-1)).pack(side="left", padx=2)
-        self._flat_button(distrow, "+", lambda: self.jog_distance(+1)).pack(side="left", padx=2)
+        self.jogstep_var = tk.IntVar(value=self.jog_step_size)
+        scale = tk.Scale(distrow, from_=1, to=500, orient="horizontal", variable=self.jogstep_var,
+                         command=self._on_jogstep_drag, bg=PANEL, fg=INK, troughcolor=PANEL_HI,
+                         highlightthickness=0, bd=0, font=self.f_mono, length=170,
+                         activebackground=AMBER, showvalue=False, sliderrelief="flat")
+        scale.pack(side="left", padx=(6, 8))
+        scale.bind("<ButtonRelease-1>", self._on_jogstep_release)
+        self.jogstep_entry_var = tk.StringVar(value=str(self.jog_step_size))
+        entry = tk.Entry(distrow, textvariable=self.jogstep_entry_var, width=5, bg=PANEL_HI, fg=INK,
+                         insertbackground=AMBER, font=self.f_mono, bd=0, justify="center")
+        entry.pack(side="left")
+        entry.bind("<Return>", self._on_jogstep_entry)
+        entry.bind("<FocusOut>", self._on_jogstep_entry)
         self.dist_label = tk.Label(distrow, text=f"step size: {self.jog_step_size} steps",
                                    bg=PANEL, fg=MUTED, font=self.f_mono)
         self.dist_label.pack(side="left", padx=(10, 0))
@@ -545,8 +576,13 @@ class Mark1OS:
         row = tk.Frame(body, bg=PANEL)
         row.pack(fill="x", pady=(8, 0))
         self._flat_button(row, "CAL STOP", lambda: self.send("CAL STOP"), accent=WARN).pack(side="left")
-        self._flat_button(row, "JOGSTEP 200", lambda: self.set_jog_step(200)).pack(side="left", padx=4)
-        self._flat_button(row, "JOGSTEP 500", lambda: self.set_jog_step(500)).pack(side="left", padx=4)
+        for n in (1, 10, 50, 200, 500):
+            self._flat_button(row, str(n), lambda n=n: self.set_jog_step(n)).pack(side="left", padx=2)
+
+        homerow = tk.Frame(body, bg=PANEL)
+        homerow.pack(fill="x", pady=(8, 0))
+        self._flat_button(homerow, "Find home (B → D → E)", self.start_homing, accent=GO).pack(side="left")
+        self._flat_button(homerow, "status", lambda: self.send("HOME?")).pack(side="left", padx=(4, 0))
 
         speedrow = tk.Frame(body, bg=PANEL)
         speedrow.pack(fill="x", pady=(6, 0))
@@ -554,7 +590,10 @@ class Mark1OS:
                  width=18, anchor="w").pack(side="left")
         # (vmin, vmax) presets — bigger microseconds = slower. vmin=start/end
         # ramp floor, vmax=cruise. Matches Markos_basic.ino's own terminology.
-        for label, vmin, vmax in [("slow", 3000, 1800), ("default", 2200, 900), ("fast", 1400, 500)]:
+        # "default" (3000/1800) now matches the firmware's own startup value
+        # — confirmed on real hardware to track noticeably better than the
+        # old 2200/900, which is kept here as "fast" instead of dropped.
+        for label, vmin, vmax in [("default", 3000, 1800), ("fast", 2200, 900), ("fastest", 1400, 500)]:
             self._flat_button(speedrow, label,
                               lambda a=vmin, b=vmax: self.send(f"SPEED {a} {b}")).pack(side="left", padx=2)
 
@@ -699,6 +738,18 @@ class Mark1OS:
                 self.move_out_d = False
             elif payload.startswith("[fw] MOVE E done"):
                 self.move_out_e = False
+            # Uppercase "[fw] HOME <axis>" is the action command's completion
+            # line (found/FAILED/already-home) — distinct from lowercase
+            # "[fw] home ..." which is HOME?'s status-only reply.
+            if self.homing_axis is not None and payload.startswith(f"[fw] HOME {self.homing_axis}"):
+                self.homing_axis = None
+                self.root.after(150, self._advance_homing)
+        if (self.homing_axis is not None and self.homing_sent_t is not None
+                and (time.time() - self.homing_sent_t) > HOMING_STEP_TIMEOUT):
+            self.write_log(f"[app] no response for HOME {self.homing_axis} after "
+                           f"{HOMING_STEP_TIMEOUT:.0f}s — aborting homing sequence", "err")
+            self.homing_axis = None
+            self.homing_queue = []
         self.root.after(40, self._pump)
 
     def write_log(self, text, tag="rx"):
@@ -1160,17 +1211,57 @@ class Mark1OS:
                     self.move_out_e = True
                 self._emit_move("E", dE)
 
-    def jog_distance(self, direction):
-        """Adjusts the shared JOG step size (JOGSTEP) by JOG_STEP_INCREMENT —
-        does not move any axis itself. The actual move happens when you
-        press one of the JOG +/- buttons above, for whichever axis, using
-        whatever step size is set here."""
-        self.set_jog_step(self.jog_step_size + JOG_STEP_INCREMENT * direction)
-
     def set_jog_step(self, n):
-        self.jog_step_size = max(1, int(n))
+        """Single source of truth for JOGSTEP — called from the slider, the
+        entry box, or anywhere else. Clamped to the slider's own 1-500
+        range. Keeps the slider and entry box in sync with each other and
+        sends the actual JOGSTEP command; does not move any axis itself."""
+        self.jog_step_size = max(1, min(500, int(n)))
         self.dist_label.configure(text=f"step size: {self.jog_step_size} steps")
+        if hasattr(self, "jogstep_var"):
+            self.jogstep_var.set(self.jog_step_size)
+            self.jogstep_entry_var.set(str(self.jog_step_size))
         self.send(f"JOGSTEP {self.jog_step_size}")
+
+    def _on_jogstep_drag(self, val):
+        # Live label/entry feedback while dragging — doesn't send JOGSTEP on
+        # every tick (that would flood the serial link); the actual send
+        # happens on release, via _on_jogstep_release.
+        self.jogstep_entry_var.set(str(int(float(val))))
+
+    def _on_jogstep_release(self, _event=None):
+        self.set_jog_step(self.jogstep_var.get())
+
+    def _on_jogstep_entry(self, _event=None):
+        try:
+            n = int(self.jogstep_entry_var.get())
+        except ValueError:
+            n = self.jog_step_size
+        self.set_jog_step(n)
+
+    def start_homing(self):
+        """Kicks off the B -> D -> E homing sequence (see HOMING_ORDER) —
+        one HOME <axis> at a time, waiting for that axis's own completion
+        line before sending the next, since the firmware blocks on each
+        HOME call until it's done."""
+        if not self.link.is_open:
+            self.write_log("Not connected", "err")
+            return
+        if self.homing_axis is not None:
+            self.write_log("[app] Homing already in progress", "err")
+            return
+        self.homing_queue = list(HOMING_ORDER)
+        self.write_log(f"[app] Homing sequence starting: {' -> '.join(HOMING_ORDER)}", "sys")
+        self._advance_homing()
+
+    def _advance_homing(self):
+        if not self.homing_queue:
+            self.homing_axis = None
+            self.write_log("[app] Homing sequence complete", "sys")
+            return
+        self.homing_axis = self.homing_queue.pop(0)
+        self.homing_sent_t = time.time()
+        self.send(f"HOME {self.homing_axis}")
 
     def _emit_move(self, axis, delta):
         """Emit a gesture-computed MOVE command. Always updates the live
