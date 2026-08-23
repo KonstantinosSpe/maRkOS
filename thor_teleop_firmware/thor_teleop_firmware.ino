@@ -1,32 +1,34 @@
 /*
   thor_teleop_firmware.ino
   =========================
-  REBUILT to match Markos_basic.ino — the user's own, previously-working
-  firmware for this exact robot. That sketch drives the motors with direct
-  digitalWrite()/delayMicroseconds() bit-banging, no stepper library, and
-  moved the real arm. Every previous version of THIS file used the
-  AccelStepper library instead and, across extensive testing, never
-  produced confirmed physical motion — same pins, no enable pin either way,
-  so the AccelStepper layer itself is the prime suspect. This version drops
-  it entirely and uses the same proven mechanism as Markos_basic.ino.
+  This sketch drives the motors the same direct way Markos_basic.ino
+  does — plain digitalWrite()/delayMicroseconds() bit-banging, no stepper
+  library, no enable pin — because that's the firmware that's actually
+  been confirmed to move this exact robot. An AccelStepper-based version
+  of this file was tried first and never produced confirmed physical
+  motion across extensive testing on the same pins, so the AccelStepper
+  layer itself is the prime suspect there; this version sidesteps that
+  question entirely by using the same proven mechanism instead.
 
-  JOG (small bounded nudges) and CAL (passive recording of net steps moved)
-  cover A / B(+C mirrored) / D / E, plus the gripper servo. MOVE (explicit
-  signed step counts, for continuous gesture-driven streaming from Python)
-  now covers A / B / D / E. D was excluded from MOVE for most of this
-  project's life ("never move D, full stop") — that guarantee has been
-  deliberately lifted by explicit request, not by accident. This firmware
-  has no concept of "armed/disarmed": it will execute any MOVE D it
-  receives exactly like MOVE A/B/E. All of the caution lives on the Python
-  side (mark1os.py's HW_CALIBRATED_D, which starts False) — if that ever
-  changes, this firmware will move D on command with no extra gate here.
+  JOG (small bounded nudges) and CAL (passive recording of net steps
+  moved) cover A / B(+C mirrored) / D / E, plus the gripper servo. MOVE
+  (explicit signed step counts, for continuous gesture-driven streaming
+  from Python) covers the same four axes, including D — D spent most of
+  this project's life excluded from MOVE ("never move D, full stop"), and
+  that guarantee has since been lifted by deliberate choice, not by
+  accident. This firmware itself has no concept of "armed/disarmed": it
+  will execute any MOVE D it receives exactly like MOVE A/B/E. All of that
+  caution lives on the Python side instead, in mark1os.py's hw_config.py
+  (HW_CALIBRATED_D, which starts False) — if that ever changes, this
+  firmware moves D on command with no extra gate here.
 
-  Every JOG move is BLOCKING and bounded by construction: a for-loop over a
-  fixed step count, checking the relevant limit switch every single pulse
-  and stopping early if it trips. There is no async "ramp toward a target"
-  state that could get stuck running — the bug class from the AccelStepper
-  version (repeated commands extending a burst indefinitely) cannot occur
-  here, because there is nothing left running once a JOG call returns.
+  Every JOG move is blocking and bounded by construction: a for-loop over
+  a fixed step count, checking the relevant limit switch every single
+  pulse and stopping early if it trips. There's no async "ramp toward a
+  target" state that could get stuck running, so the failure mode an
+  AccelStepper-based version could hit — a repeated command silently
+  extending a burst indefinitely — simply can't happen here, since nothing
+  is still running once a JOG call returns.
 
   ────────────────────────────────────────────────────────────────────────
   JOG — small, precise nudges. Blocking, bounded, checked against limits
@@ -43,10 +45,10 @@
 
   Prints "[fw] JOG A done, moved N" on completion — N is the actual signed
   step count completed (may be less than requested if a limit switch
-  stopped it early). This confirms the command was received and a pulse
-  sequence was issued; it does NOT by itself prove the motor physically
-  turned — that still depends on the driver actually being powered and
-  wired correctly, which is a separate, physical thing to verify by eye.
+  stopped it early). That confirms the command was received and a pulse
+  sequence was issued; it doesn't by itself prove the motor physically
+  turned, since that still depends on the driver being powered and wired
+  correctly — worth a visual check by eye, separately from this.
 
   ────────────────────────────────────────────────────────────────────────
   CAL — passive recording of net distance traveled, in exact steps.
@@ -89,9 +91,8 @@
      E is assumed INVERTED (HIGH = triggered) per the original hardware's
      own notes. Verify by hand-triggering each switch and watching for
      "[fw] LIMIT" before doing anything else.
-  3. GRIP_PIN is 10, matching Markos_basic.ino (the earlier firmware used
-     an unverified guess of 11 — this is the corrected, evidence-based
-     value). Still worth a visual confirmation of the wiring before trusting it.
+  3. GRIP_PIN is 10, matching Markos_basic.ino — worth a visual check of
+     the wiring before trusting it, same as anything else on this list.
   4. jogStepSteps and VMIN_US/VMAX_US (the ramp speed range, defaulted to
      Markos_basic.ino's own proven values) are both tunable live, no
      reflash needed — JOGSTEP <n> for step count, SPEED <vmin> <vmax> for
@@ -109,23 +110,34 @@ const int STEP_D = 22, DIR_D = 30, LIM_D = 48;          // elbow
 const int STEP_E = 23, DIR_E = 31, LIM_E = 49;          // lower rotation
 
 const bool MIRROR_C     = true;   // confirmed in Markos_basic.ino
-const bool LIM_E_INVERTED = false; // flipped from true: the original "inverted" note was about
-                                    // Grbl's own status-word correction, not necessarily raw
-                                    // digitalRead() behavior here — with true, E read as
-                                    // permanently triggered in both directions on real hardware
-const bool E_DIR_FLIP = true;      // A and E were observed rotating opposite ways for what
-                                    // should be the same "+" sense — flips E's sign (in both
-                                    // JOG and MOVE) so + means the same rotational direction
-                                    // on both axes. Applied here, at the source, so it's
-                                    // consistent no matter how E is driven.
-const bool B_DIR_FLIP = false;     // set true if JOG B+/MOVE B<positive> moves the shoulder
-                                    // opposite to what the height/reach IK expects — B was
-                                    // only armed for live MOVE this session, direction vs.
-                                    // the IK's sign convention has not been isolated-tested
-const bool D_DIR_FLIP = false;     // same as B_DIR_FLIP but for D (elbow/J5) — D has never
-                                    // been live-driven before this session at all
+const bool LIM_E_INVERTED = false; // E's home switch is read directly via
+                                    // digitalRead(), the same as the other
+                                    // axes (LOW = triggered) — the
+                                    // "inverted" note this contradicts
+                                    // turned out to describe Grbl's own
+                                    // status-word correction, a different
+                                    // layer entirely, not the raw pin
+                                    // reading used here.
+const bool E_DIR_FLIP = true;      // A and E were observed rotating opposite
+                                    // ways for what should be the same "+"
+                                    // sense, so this flips E's sign (in both
+                                    // JOG and MOVE) to bring the two back
+                                    // into agreement. Applied here, at the
+                                    // source, so it stays consistent no
+                                    // matter how E ends up being driven.
+const bool B_DIR_FLIP = false;     // set true if JOG B+/MOVE B<positive> moves
+                                    // the shoulder opposite to what the
+                                    // height/reach IK expects — B's direction
+                                    // relative to the IK's sign convention
+                                    // hasn't been isolated-tested yet, only
+                                    // its magnitude has.
+const bool D_DIR_FLIP = false;     // same idea as B_DIR_FLIP, for D — D has
+                                    // even less live-driving history than B.
 
-const int GRIP_PIN = 10;   // matches Markos_basic.ino (corrected from an earlier guess of 11)
+const int GRIP_PIN = 10;   // matches Markos_basic.ino — an earlier version
+                            // of this file guessed 11, so it's worth a
+                            // visual check of the wiring before trusting
+                            // this one either.
 
 // ── Homing beacons — separate from LIM_A/B/D/E above, which only stop a JOG/
 // MOVE early if hit mid-travel. These are dedicated optical endstops found
@@ -138,89 +150,89 @@ const bool HOME_E_ACTIVE_HIGH = true;    // confirmed by hand: HIGH = at home
 const bool HOME_B_ACTIVE_HIGH = false;   // confirmed by hand: LOW  = at home
 const bool HOME_D_ACTIVE_HIGH = true;    // confirmed by hand: HIGH = at home
 // A (mid-arm twist) has no beacon yet — not needed yet either, since A is
-// still disarmed on the Python side (HW_CALIBRATED_A = False). Add one here
-// the same way if that ever changes.
+// still disarmed on the Python side (HW_CALIBRATED_A = False in
+// hw_config.py). Add one here the same way if that ever changes.
 
 // ── B's software position clamp ──────────────────────────────────────────
-// B's home is at one edge (the near/'+' side), backed up by the real,
-// working LIM_B hardware switch — so unlike D, the '+' direction already
-// has a genuine hardware backstop. The FAR edge ('-' direction, into the
-// usable range) has no switch at all though, and its true physical extent
-// is now known directly (measured by hand: 180 steps edge-to-edge) rather
-// than assumed from the code's separate J3 soft-angle-limit (~245 steps,
-// which turned out to be well past the real mechanical range — exactly
-// what caused the 51-step discrepancy at the 245-step calibration point,
-// it was grinding against the far hard stop for the excess). 10-step
-// margin subtracted off each end.
+// B's home sits at one edge (the near/'+' side), and that side already has
+// a genuine hardware backstop in the real, working LIM_B switch. The far
+// edge ('-' direction, into the usable range) has no switch at all, so its
+// true physical extent has to come from somewhere else — hand-measured
+// directly, it's 180 steps edge-to-edge. That's noticeably tighter than the
+// code's separate J3 soft-angle-limit would suggest (around 245 steps),
+// which is too generous for the real mechanism: driving out to that number
+// means grinding against the far hard stop for the excess, which is exactly
+// what a 51-step discrepancy at the 245-step calibration point turned out
+// to be. 10 steps of margin are subtracted off each end below.
 const long B_SOFT_MIN = -170;
 const long B_SOFT_MAX = 10;
 
 // ── D's software position clamp ──────────────────────────────────────────
-// LIM_D (pin 48, in the original limit-switch block above) does not
-// reliably trigger — confirmed by hand-testing, it never fired even well
-// past where home is. So unlike B and E, D has NO working hardware backstop
-// against overtravel. These bounds are D's only real protection, set to
-// the FULL hand-tested safe range (drove to -1700 and +1500 steps from
-// home, both with no incident) — not shaved down with extra margin. An
-// earlier version subtracted ~100 steps of margin here, but posD is just
-// an open-loop step count with no absolute reference except a successful
-// HOME D — any drift since the last one (a lost step under load, a prior
-// failed search returning to a not-quite-true start) eats directly into
-// whatever margin is subtracted, and in practice caused HOME D to give up
-// early rather than actually add safety. Using the full tested range
-// instead gives real drift tolerance while still never exceeding what was
-// hand-verified safe.
+// LIM_D (pin 48, in the limit-switch block above) doesn't reliably trigger
+// — confirmed by hand-testing, it never fired even well past where home
+// is. So unlike B and E, D has no working hardware backstop against
+// overtravel, and these bounds are its only real protection. They're set
+// to the full hand-tested safe range (driven to -1700 and +1500 steps from
+// home, both without incident) rather than shaved down with extra margin,
+// because posD is just an open-loop step count with no absolute reference
+// except a successful HOME D — any drift since the last one (a lost step
+// under load, a prior search that returned to a not-quite-true start) eats
+// directly into whatever margin gets subtracted here. Using the full
+// tested range instead gives real tolerance for that drift while still
+// never exceeding what's actually been verified safe by hand.
 const long D_SOFT_MIN = -1700;
 const long D_SOFT_MAX = 1500;
 
 // ── Bounded search distances for HOME <axis> ─────────────────────────────
-// D's search request is deliberately much bigger than D_SOFT_MIN/MAX's full
-// span (3200) — NOT because D is allowed to travel that far, but so the
-// soft limit (an absolute position check) is always what stops the search,
-// never the requested step count itself. If this were set equal to
-// D_SOFT_MAX like an earlier version had it, the search would only cover
-// its full intended distance when posD happened to already be exactly 0 —
-// any other starting position (completely normal after manual JOG testing)
-// would hit the absolute soft limit boundary after far fewer steps than
-// intended, cutting the search short well before it should give up. The
-// soft limit itself is unchanged and still the real safety bound; this
-// only affects how far the search is willing to LOOK.
+// D's search request (3500) is deliberately larger than D_SOFT_MIN/MAX's
+// full span (3200) — not because D is allowed to travel that far, but so
+// the soft limit, an absolute position check, is always what stops the
+// search rather than the requested step count itself. Sizing the request
+// to match D_SOFT_MAX exactly would only cover the intended search
+// distance when posD happens to start at exactly 0; starting anywhere
+// else — completely normal after manual JOG testing — would hit the
+// absolute soft-limit boundary after far fewer steps than intended,
+// cutting the search short before it should actually give up. The soft
+// limit itself is unchanged and still the real safety bound; this only
+// affects how far the search is willing to look.
 const long HOME_SEARCH_D_PLUS  = 3500;
 const long HOME_SEARCH_D_MINUS = 3500;
 // B's is a generous guess since its beacon sits at an edge and LIM_B works
-// as a real backstop either way. E's covers a bit over one full rotation
-// (2200 steps = 360°) — E's search picks a starting direction based on
-// estimated shortest path (see doHomeSearch's E branch) rather than always
-// searching the same way, but still needs a bound generous enough to find
-// the beacon even if that estimate is wrong and it has to fall back.
+// as a real backstop either way. E's search picks a starting direction
+// based on estimated shortest path (see doHomeSearch's E branch) rather
+// than always searching the same way, but still needs a bound generous
+// enough to find the beacon even if that estimate is wrong and it has to
+// fall back the other way.
 const long HOME_SEARCH_B       = 2000;
-// Directly measured via SWEEP E+/E- (a real full lap, home to home): 1003
-// steps forward, 1004 back. The old 2200 figure (inherited from an early,
-// never-reverified calibration note) was wrong by more than 2x — this is
-// what caused HOME E's shortest-path estimate to misbehave specifically
-// once magnitudes approached and passed the true ~1003-step lap. Using
-// the average, rounded; the 1-step/0.1% difference between directions
-// isn't worth modeling separately. stepsPerDegE in mark1os.py is derived
-// from this too (1004/360 ~= 2.79, not the old 6.11) — see that file.
+// E_FULL_ROTATION comes from a direct measurement (SWEEP E+/E-, a real
+// full lap home to home): 1003 steps forward, 1004 back. That matters
+// because a full lap isn't something you can derive from the motor's
+// nominal steps/rev the way you might hope — the number here uses the
+// average of the two directions, rounded; the 1-step/0.1% difference
+// between them isn't worth modeling separately. mark1os.py's
+// stepsPerDegE is derived from this same measurement (1004/360), so the
+// two stay consistent with each other.
 const long E_FULL_ROTATION     = 1004;
 const long HOME_SEARCH_E       = 1300;   // full lap + generous margin
 
 // ── Ramp speed range (microseconds between pulse edges). BIGGER = SLOWER.
-// Starts/ends slow, cruises fast. Was Markos_basic.ino's own 2200/900
-// default; raised to the mark1os.py GUI's "slow" preset after confirming
-// on real hardware it tracks noticeably better — likely because every
-// limit/beacon/soft-limit check happens once per step, and the faster
-// default left less margin to catch a trigger cleanly before overshooting.
-// Still adjustable live with no reflash via SPEED <vmin> <vmax>.
+// Starts/ends slow, cruises fast. Matches Markos_basic.ino's own
+// terminology and started from its 2200/900 default; this file's default
+// runs a bit slower than that (3000/1800), which tracks noticeably more
+// reliably on real hardware — every limit/beacon/soft-limit check happens
+// once per step, so the faster default leaves less margin to catch a
+// trigger cleanly before overshooting it. Still adjustable live with no
+// reflash via SPEED <vmin> <vmax>.
 int VMIN_US = 3000;
 int VMAX_US = 1800;
 const float RAMP_FRAC = 0.3;   // fraction of the move spent accelerating (and decelerating)
 
 // Homing searches run even slower than normal JOG/MOVE speed. D in
-// particular can lose steps under load, and which direction is "uphill"
-// depends on D's current angle, not a fixed sign — so rather than guess
-// which direction needs more margin, doHome() slows every homing search
-// down uniformly for more torque margin regardless of direction.
+// particular can lose steps under load, and which direction counts as
+// "uphill" depends on D's current angle rather than a fixed sign — so
+// instead of guessing which direction needs more margin, doHome() just
+// slows every homing search down uniformly, for more torque margin
+// regardless of direction.
 const int HOME_VMIN_US = 4200;
 const int HOME_VMAX_US = 2600;
 
@@ -415,20 +427,41 @@ const char* axisName(int axis) {
   }
 }
 
-void doJog(char axis, float dir) {
-  long steps = (long)(dir * jogStepSteps);
+// Moves one axis by a signed step count, applying that axis's own
+// direction flip and soft-limit clamp, and updates its position counter.
+// This is the one place that logic lives — both doJog() and the MOVE
+// command handler in applyLine() need it, and keeping it in one function
+// means a change to how an axis is driven (a new clamp, a corrected
+// DIR_FLIP) only has to happen once instead of being kept in sync by hand
+// in two places.
+long applyAxisDelta(char axis, long n) {
   long moved = 0;
   switch (axis) {
-    case 'A': moved = moveOne(STEP_A, DIR_A, steps, LIM_A, false); posA += moved; break;
-    case 'B': moved = moveUpperElbow(B_DIR_FLIP ? -steps : steps, -1, false,
-                                      posB, B_SOFT_MIN, B_SOFT_MAX);
-              posB += moved; break;
-    case 'D': moved = moveOne(STEP_D, DIR_D, D_DIR_FLIP ? -steps : steps, LIM_D, false,
-                               posD, D_SOFT_MIN, D_SOFT_MAX);
-              posD += moved; break;
-    case 'E': moved = moveOne(STEP_E, DIR_E, E_DIR_FLIP ? -steps : steps, LIM_E, LIM_E_INVERTED);
-              posE += moved; break;
+    case 'A':
+      moved = moveOne(STEP_A, DIR_A, n, LIM_A, false);
+      posA += moved;
+      break;
+    case 'B':
+      moved = moveUpperElbow(B_DIR_FLIP ? -n : n, -1, false,
+                              posB, B_SOFT_MIN, B_SOFT_MAX);
+      posB += moved;
+      break;
+    case 'D':
+      moved = moveOne(STEP_D, DIR_D, D_DIR_FLIP ? -n : n, LIM_D, false,
+                       posD, D_SOFT_MIN, D_SOFT_MAX);
+      posD += moved;
+      break;
+    case 'E':
+      moved = moveOne(STEP_E, DIR_E, E_DIR_FLIP ? -n : n, LIM_E, LIM_E_INVERTED);
+      posE += moved;
+      break;
   }
+  return moved;
+}
+
+void doJog(char axis, float dir) {
+  long steps = (long)(dir * jogStepSteps);
+  long moved = applyAxisDelta(axis, steps);
   Serial.print("[fw] JOG ");
   Serial.print(axis);
   Serial.print(" done, moved ");
@@ -465,12 +498,12 @@ void doHomeSearch(char axis) {
     }
     // D's home is centered (0), not at an edge, so which direction is
     // actually shorter depends entirely on which side of 0 posD is
-    // currently on — always trying '+' first (like an earlier version
-    // did) meant every '+'-side test point's return search needlessly
-    // travelled all the way out to D_SOFT_MAX before reversing and
-    // finding it going '-'. Simpler than E's mod-based estimate since D
-    // isn't circular: negative posD means home is toward '+', positive
-    // means home is toward '-'.
+    // currently on. Always trying '+' first regardless of that would mean
+    // every '+'-side test point's return search needlessly travels all
+    // the way out to D_SOFT_MAX before reversing and finding it going '-'.
+    // Simpler than E's mod-based estimate since D isn't circular:
+    // negative posD means home is toward '+', positive means home is
+    // toward '-'.
     bool searchPositive = (posD < 0);
     long primaryReq = searchPositive ? HOME_SEARCH_D_PLUS : -HOME_SEARCH_D_MINUS;
     long moved = moveOne(STEP_D, DIR_D, primaryReq, HOME_D, HOME_D_ACTIVE_HIGH,
@@ -530,15 +563,16 @@ void doHomeSearch(char axis) {
       posE = 0;
       return;
     }
-    // E is a continuous rotation with no "proximal/distal" concept, so
+    // E is a continuous rotation with no proximal/distal concept, so
     // unlike D/B there's no reason to always search the same fixed
-    // direction — that's exactly what caused wildly inconsistent results
-    // during calibration (searching the long way around in some cases,
-    // failing to find it at all in others). Instead, estimate which
-    // direction is actually shorter from posE's accumulated position
-    // (mod one full rotation) and try that first, falling back to the
-    // other direction if the estimate turns out wrong — same
-    // try-then-fallback pattern as D's search above.
+    // direction — a fixed direction is exactly what makes results
+    // inconsistent for a continuous twist, sometimes searching the long
+    // way around, sometimes missing the beacon within the search bound
+    // entirely. Instead, estimate which direction is actually shorter
+    // from posE's accumulated position (mod one full rotation) and try
+    // that first, falling back to the other direction if the estimate
+    // turns out wrong — same try-then-fallback pattern as D's search
+    // above.
     long offset = posE % E_FULL_ROTATION;
     if (offset < 0) offset += E_FULL_ROTATION;
     bool searchPositive = (offset > E_FULL_ROTATION / 2);
@@ -581,9 +615,9 @@ void doHome(char axis) {
 
 // SWEEP E+ / SWEEP E- — measures a genuine full lap: forces the search in
 // the exact requested direction regardless of what looks shorter (unlike
-// HOME E, which now picks whichever direction its position estimate says
-// is closer — the right choice for normal homing, but wrong for this,
-// where the point is to go all the way around on purpose and see how many
+// HOME E, which picks whichever direction its position estimate says is
+// closer — the right choice for normal homing, but wrong here, where the
+// whole point is to go all the way around on purpose and see how many
 // steps a real full rotation actually takes). Meant to be called starting
 // from home; if it isn't, the reported count won't mean "one lap."
 void doSweepE(int dir) {
@@ -715,7 +749,7 @@ void applyLine(const String& rawLine) {
     // "MOVE A<n> B<n> D<n> E<n>" — explicit signed step count (not the fixed
     // JOG size), for continuous velocity-control use: Python computes a
     // fresh delta from live gesture velocity and sends it here every tick.
-    // Same blocking, ramped, limit-checked move functions as JOG.
+    // Same blocking, ramped, limit-checked move as JOG, via applyAxisDelta().
     String rest = line.substring(5);
     int i = 0, len = rest.length();
     while (i < len) {
@@ -724,22 +758,7 @@ void applyLine(const String& rawLine) {
         int j = i + 1;
         while (j < len && rest[j] != ' ') j++;
         long n = rest.substring(i + 1, j).toInt();
-        long moved;
-        if (c == 'A') {
-          moved = moveOne(STEP_A, DIR_A, n, LIM_A, false);
-          posA += moved;
-        } else if (c == 'B') {
-          moved = moveUpperElbow(B_DIR_FLIP ? -n : n, -1, false,
-                                  posB, B_SOFT_MIN, B_SOFT_MAX);
-          posB += moved;
-        } else if (c == 'D') {
-          moved = moveOne(STEP_D, DIR_D, D_DIR_FLIP ? -n : n, LIM_D, false,
-                           posD, D_SOFT_MIN, D_SOFT_MAX);
-          posD += moved;
-        } else {
-          moved = moveOne(STEP_E, DIR_E, E_DIR_FLIP ? -n : n, LIM_E, LIM_E_INVERTED);
-          posE += moved;
-        }
+        long moved = applyAxisDelta(c, n);
         Serial.print("[fw] MOVE ");
         Serial.print(c);
         Serial.print(" done, moved ");
