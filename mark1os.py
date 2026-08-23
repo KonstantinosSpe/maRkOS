@@ -50,7 +50,9 @@ One Tkinter window combining three things that used to be separate tools:
        HW_CALIBRATED_A = False — disarmed until A is re-measured, ideally
        at a slower SPEED setting to reduce step loss. Also currently
        receives no gesture signal at all (see A's physical-role note above).
-    E: 2200 steps = 360°, measured cleanly. stepsPerDegE = 6.11 (trusted).
+    E: 1004 steps = 360° (corrected — a real full-lap measurement via the
+       firmware's SWEEP E+/E- found 1003/1004 steps, not the old,
+       never-reverified 2200 estimate). stepsPerDegE = 2.79.
        HW_CALIBRATED_E = True — armed. Driven by left/right hand offset.
     D and B (+C) are J3 and J5 of the same 2-link IK (solve_reach_ik solves
        both from one (height, reach) point). Because D is the proximal
@@ -107,10 +109,16 @@ HW_CALIBRATED_B = True    # B: 490 steps = 180 deg, measured cleanly — trusted
 stepsPerDegA = 2200 / 360    # = 6.111...,  UNRELIABLE — recorded but not armed
 stepsPerDegB = 490 / 180     # = 2.722...,  measured cleanly — trusted
 stepsPerDegD = 3700 / 180    # = 20.556..., recorded but not yet confirmed live
-stepsPerDegE = 2200 / 360    # = 6.111...,  measured cleanly — trusted
+# CORRECTED: the "2200 steps = 360deg" note below was an early estimate,
+# never actually re-verified — a real full-lap measurement via firmware's
+# SWEEP E+/E- (home to home, forced single direction) came back at 1003
+# steps forward / 1004 back, not 2200. The old value was wrong by more
+# than 2x, meaning E has been moving roughly half as far as intended for
+# any given gesture-control rotation command this whole time.
+stepsPerDegE = 1004 / 360    # = 2.789..., corrected from a wrong 6.111 (see above)
 
-HW_CALIBRATED_E = True   # lower rotation: clean 2200 steps / 360 deg measurement,
-                         # driven by left/right hand offset (freed from A)
+HW_CALIBRATED_E = True   # lower rotation: driven by left/right hand offset
+                         # (freed from A) — stepsPerDegE corrected above
 
 HW_CALIBRATED_D = True   # Re-armed: the earlier "up/down unreliable" symptom
                          # traced to the pinch-engage twitch (ENGAGE_DEADZONE),

@@ -1,0 +1,2252 @@
+[
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 30,
+    "timestamp": "2026-08-23T21:14:57",
+    "moved_out": 30,
+    "actual_return": 31,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 60,
+    "timestamp": "2026-08-23T21:14:59",
+    "moved_out": 60,
+    "actual_return": 60,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 90,
+    "timestamp": "2026-08-23T21:15:00",
+    "moved_out": 90,
+    "actual_return": 90,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 120,
+    "timestamp": "2026-08-23T21:15:02",
+    "moved_out": 120,
+    "actual_return": 121,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 150,
+    "timestamp": "2026-08-23T21:15:04",
+    "moved_out": 150,
+    "actual_return": 150,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 180,
+    "timestamp": "2026-08-23T21:15:07",
+    "moved_out": 180,
+    "actual_return": 180,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 210,
+    "timestamp": "2026-08-23T21:15:10",
+    "moved_out": 210,
+    "actual_return": 211,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 240,
+    "timestamp": "2026-08-23T21:15:13",
+    "moved_out": 240,
+    "actual_return": 240,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 270,
+    "timestamp": "2026-08-23T21:15:17",
+    "moved_out": 270,
+    "actual_return": 270,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 300,
+    "timestamp": "2026-08-23T21:15:21",
+    "moved_out": 300,
+    "actual_return": 301,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 330,
+    "timestamp": "2026-08-23T21:15:25",
+    "moved_out": 330,
+    "actual_return": 330,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 360,
+    "timestamp": "2026-08-23T21:15:30",
+    "moved_out": 360,
+    "actual_return": 360,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 390,
+    "timestamp": "2026-08-23T21:15:36",
+    "moved_out": 390,
+    "actual_return": 390,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 420,
+    "timestamp": "2026-08-23T21:15:41",
+    "moved_out": 420,
+    "actual_return": 420,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 450,
+    "timestamp": "2026-08-23T21:15:47",
+    "moved_out": 450,
+    "actual_return": 451,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 480,
+    "timestamp": "2026-08-23T21:15:53",
+    "moved_out": 480,
+    "actual_return": 480,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 510,
+    "timestamp": "2026-08-23T21:16:00",
+    "moved_out": 510,
+    "actual_return": 510,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 540,
+    "timestamp": "2026-08-23T21:16:07",
+    "moved_out": 540,
+    "actual_return": 541,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 570,
+    "timestamp": "2026-08-23T21:16:14",
+    "moved_out": 570,
+    "actual_return": 570,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 600,
+    "timestamp": "2026-08-23T21:16:22",
+    "moved_out": 600,
+    "actual_return": 600,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 630,
+    "timestamp": "2026-08-23T21:16:30",
+    "moved_out": 630,
+    "actual_return": 631,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 660,
+    "timestamp": "2026-08-23T21:16:38",
+    "moved_out": 660,
+    "actual_return": 660,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 690,
+    "timestamp": "2026-08-23T21:16:47",
+    "moved_out": 690,
+    "actual_return": 690,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 720,
+    "timestamp": "2026-08-23T21:16:56",
+    "moved_out": 720,
+    "actual_return": 720,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 750,
+    "timestamp": "2026-08-23T21:17:06",
+    "moved_out": 750,
+    "actual_return": 750,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 780,
+    "timestamp": "2026-08-23T21:17:15",
+    "moved_out": 780,
+    "actual_return": 780,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 810,
+    "timestamp": "2026-08-23T21:17:25",
+    "moved_out": 810,
+    "actual_return": 810,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 840,
+    "timestamp": "2026-08-23T21:17:36",
+    "moved_out": 840,
+    "actual_return": 841,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 870,
+    "timestamp": "2026-08-23T21:17:46",
+    "moved_out": 870,
+    "actual_return": 869,
+    "discrepancy": 1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 900,
+    "timestamp": "2026-08-23T21:17:57",
+    "moved_out": 900,
+    "actual_return": 901,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 930,
+    "timestamp": "2026-08-23T21:18:09",
+    "moved_out": 930,
+    "actual_return": 930,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 960,
+    "timestamp": "2026-08-23T21:18:20",
+    "moved_out": 960,
+    "actual_return": 959,
+    "discrepancy": 1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 990,
+    "timestamp": "2026-08-23T21:18:32",
+    "moved_out": 990,
+    "actual_return": 990,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1020,
+    "timestamp": "2026-08-23T21:18:44",
+    "moved_out": 1020,
+    "actual_return": 1021,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1050,
+    "timestamp": "2026-08-23T21:18:57",
+    "moved_out": 1050,
+    "actual_return": 1049,
+    "discrepancy": 1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1080,
+    "timestamp": "2026-08-23T21:19:10",
+    "moved_out": 1080,
+    "actual_return": 1081,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1110,
+    "timestamp": "2026-08-23T21:19:23",
+    "moved_out": 1110,
+    "actual_return": 1110,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1140,
+    "timestamp": "2026-08-23T21:19:36",
+    "moved_out": 1140,
+    "actual_return": 1139,
+    "discrepancy": 1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1170,
+    "timestamp": "2026-08-23T21:19:50",
+    "moved_out": 1170,
+    "actual_return": 1170,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1200,
+    "timestamp": "2026-08-23T21:20:04",
+    "moved_out": 1200,
+    "actual_return": 1200,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1230,
+    "timestamp": "2026-08-23T21:20:18",
+    "moved_out": 1230,
+    "actual_return": 1231,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1260,
+    "timestamp": "2026-08-23T21:20:33",
+    "moved_out": 1260,
+    "actual_return": 1260,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1290,
+    "timestamp": "2026-08-23T21:20:48",
+    "moved_out": 1290,
+    "actual_return": 1290,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1320,
+    "timestamp": "2026-08-23T21:21:03",
+    "moved_out": 1320,
+    "actual_return": 1320,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1350,
+    "timestamp": "2026-08-23T21:21:18",
+    "moved_out": 1350,
+    "actual_return": 1350,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1380,
+    "timestamp": "2026-08-23T21:21:34",
+    "moved_out": 1380,
+    "actual_return": 1380,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1410,
+    "timestamp": "2026-08-23T21:21:50",
+    "moved_out": 1410,
+    "actual_return": 1411,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1440,
+    "timestamp": "2026-08-23T21:22:07",
+    "moved_out": 1440,
+    "actual_return": 1440,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1470,
+    "timestamp": "2026-08-23T21:22:23",
+    "moved_out": 1470,
+    "actual_return": 1471,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "+",
+    "commanded": 1500,
+    "timestamp": "2026-08-23T21:22:40",
+    "moved_out": 1500,
+    "actual_return": 1501,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 68,
+    "timestamp": "2026-08-23T22:15:45",
+    "moved_out": -68,
+    "actual_return": 70,
+    "discrepancy": -2
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 102,
+    "timestamp": "2026-08-23T21:23:00",
+    "moved_out": -102,
+    "actual_return": 103,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 136,
+    "timestamp": "2026-08-23T21:23:02",
+    "moved_out": -136,
+    "actual_return": 139,
+    "discrepancy": -3
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 170,
+    "timestamp": "2026-08-23T21:23:05",
+    "moved_out": -170,
+    "actual_return": 172,
+    "discrepancy": -2
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 204,
+    "timestamp": "2026-08-23T21:23:08",
+    "moved_out": -204,
+    "actual_return": 205,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 238,
+    "timestamp": "2026-08-23T21:23:11",
+    "moved_out": -238,
+    "actual_return": 239,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 272,
+    "timestamp": "2026-08-23T21:23:15",
+    "moved_out": -272,
+    "actual_return": 273,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 306,
+    "timestamp": "2026-08-23T21:23:19",
+    "moved_out": -306,
+    "actual_return": 307,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 340,
+    "timestamp": "2026-08-23T21:23:23",
+    "moved_out": -340,
+    "actual_return": 341,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 374,
+    "timestamp": "2026-08-23T21:23:28",
+    "moved_out": -374,
+    "actual_return": 375,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 408,
+    "timestamp": "2026-08-23T21:23:34",
+    "moved_out": -408,
+    "actual_return": 409,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 442,
+    "timestamp": "2026-08-23T21:23:40",
+    "moved_out": -442,
+    "actual_return": 442,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 476,
+    "timestamp": "2026-08-23T21:23:46",
+    "moved_out": -476,
+    "actual_return": 477,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 510,
+    "timestamp": "2026-08-23T21:23:52",
+    "moved_out": -510,
+    "actual_return": 510,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 544,
+    "timestamp": "2026-08-23T21:23:59",
+    "moved_out": -544,
+    "actual_return": 545,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 578,
+    "timestamp": "2026-08-23T21:24:07",
+    "moved_out": -578,
+    "actual_return": 578,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 612,
+    "timestamp": "2026-08-23T21:24:15",
+    "moved_out": -612,
+    "actual_return": 613,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 646,
+    "timestamp": "2026-08-23T21:24:23",
+    "moved_out": -646,
+    "actual_return": 646,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 680,
+    "timestamp": "2026-08-23T21:24:31",
+    "moved_out": -680,
+    "actual_return": 681,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 714,
+    "timestamp": "2026-08-23T21:24:40",
+    "moved_out": -714,
+    "actual_return": 714,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 748,
+    "timestamp": "2026-08-23T21:24:50",
+    "moved_out": -748,
+    "actual_return": 748,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 782,
+    "timestamp": "2026-08-23T21:24:59",
+    "moved_out": -782,
+    "actual_return": 783,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 816,
+    "timestamp": "2026-08-23T21:25:09",
+    "moved_out": -816,
+    "actual_return": 816,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 850,
+    "timestamp": "2026-08-23T21:25:20",
+    "moved_out": -850,
+    "actual_return": 851,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 884,
+    "timestamp": "2026-08-23T21:25:30",
+    "moved_out": -884,
+    "actual_return": 883,
+    "discrepancy": 1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 918,
+    "timestamp": "2026-08-23T21:25:42",
+    "moved_out": -918,
+    "actual_return": 919,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 952,
+    "timestamp": "2026-08-23T21:25:53",
+    "moved_out": -952,
+    "actual_return": 952,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 986,
+    "timestamp": "2026-08-23T21:26:05",
+    "moved_out": -986,
+    "actual_return": 986,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1020,
+    "timestamp": "2026-08-23T21:26:17",
+    "moved_out": -1020,
+    "actual_return": 1021,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1054,
+    "timestamp": "2026-08-23T21:26:30",
+    "moved_out": -1054,
+    "actual_return": 1054,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1088,
+    "timestamp": "2026-08-23T21:26:42",
+    "moved_out": -1088,
+    "actual_return": 1088,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1122,
+    "timestamp": "2026-08-23T21:26:56",
+    "moved_out": -1122,
+    "actual_return": 1123,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1156,
+    "timestamp": "2026-08-23T21:27:09",
+    "moved_out": -1156,
+    "actual_return": 1157,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1190,
+    "timestamp": "2026-08-23T21:27:23",
+    "moved_out": -1190,
+    "actual_return": 1190,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1224,
+    "timestamp": "2026-08-23T21:27:37",
+    "moved_out": -1224,
+    "actual_return": 1225,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1258,
+    "timestamp": "2026-08-23T21:27:52",
+    "moved_out": -1258,
+    "actual_return": 1259,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1292,
+    "timestamp": "2026-08-23T21:28:07",
+    "moved_out": -1292,
+    "actual_return": 1293,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1326,
+    "timestamp": "2026-08-23T21:28:22",
+    "moved_out": -1326,
+    "actual_return": 1326,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1360,
+    "timestamp": "2026-08-23T21:28:38",
+    "moved_out": -1360,
+    "actual_return": 1361,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1394,
+    "timestamp": "2026-08-23T21:28:53",
+    "moved_out": -1394,
+    "actual_return": 1394,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1428,
+    "timestamp": "2026-08-23T21:29:10",
+    "moved_out": -1428,
+    "actual_return": 1430,
+    "discrepancy": -2
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1462,
+    "timestamp": "2026-08-23T21:29:26",
+    "moved_out": -1462,
+    "actual_return": 1464,
+    "discrepancy": -2
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1496,
+    "timestamp": "2026-08-23T21:29:43",
+    "moved_out": -1496,
+    "actual_return": 1498,
+    "discrepancy": -2
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1530,
+    "timestamp": "2026-08-23T21:30:00",
+    "moved_out": -1530,
+    "actual_return": 1531,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1564,
+    "timestamp": "2026-08-23T21:30:18",
+    "moved_out": -1564,
+    "actual_return": 1565,
+    "discrepancy": -1
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1598,
+    "timestamp": "2026-08-23T22:47:41",
+    "moved_out": -1598,
+    "actual_return": 1601,
+    "discrepancy": -3
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1632,
+    "timestamp": "2026-08-23T21:30:54",
+    "moved_out": -1632,
+    "actual_return": 1635,
+    "discrepancy": -3
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1666,
+    "timestamp": "2026-08-23T21:31:13",
+    "moved_out": -1666,
+    "actual_return": 1669,
+    "discrepancy": -3
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 1700,
+    "timestamp": "2026-08-23T21:31:32",
+    "moved_out": -1700,
+    "actual_return": 1702,
+    "discrepancy": -2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 7,
+    "timestamp": "2026-08-23T21:31:52",
+    "moved_out": -7,
+    "actual_return": 6,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 10,
+    "timestamp": "2026-08-23T21:31:53",
+    "moved_out": -10,
+    "actual_return": 6,
+    "discrepancy": 4
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 14,
+    "timestamp": "2026-08-23T21:31:53",
+    "moved_out": -14,
+    "actual_return": 11,
+    "discrepancy": 3
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 17,
+    "timestamp": "2026-08-23T21:31:54",
+    "moved_out": -17,
+    "actual_return": 13,
+    "discrepancy": 4
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 20,
+    "timestamp": "2026-08-23T21:31:55",
+    "moved_out": -20,
+    "actual_return": 17,
+    "discrepancy": 3
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 24,
+    "timestamp": "2026-08-23T21:31:56",
+    "moved_out": -24,
+    "actual_return": 25,
+    "discrepancy": -1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 27,
+    "timestamp": "2026-08-23T21:31:57",
+    "moved_out": -27,
+    "actual_return": 26,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 31,
+    "timestamp": "2026-08-23T21:31:58",
+    "moved_out": -31,
+    "actual_return": 29,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 34,
+    "timestamp": "2026-08-23T21:31:59",
+    "moved_out": -34,
+    "actual_return": 32,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 37,
+    "timestamp": "2026-08-23T21:32:00",
+    "moved_out": -37,
+    "actual_return": 38,
+    "discrepancy": -1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 41,
+    "timestamp": "2026-08-23T21:32:01",
+    "moved_out": -41,
+    "actual_return": 41,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 44,
+    "timestamp": "2026-08-23T21:32:03",
+    "moved_out": -44,
+    "actual_return": 43,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 48,
+    "timestamp": "2026-08-23T21:32:04",
+    "moved_out": -48,
+    "actual_return": 46,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 51,
+    "timestamp": "2026-08-23T21:32:05",
+    "moved_out": -51,
+    "actual_return": 49,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 54,
+    "timestamp": "2026-08-23T21:32:07",
+    "moved_out": -54,
+    "actual_return": 52,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 58,
+    "timestamp": "2026-08-23T21:32:08",
+    "moved_out": -58,
+    "actual_return": 56,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 61,
+    "timestamp": "2026-08-23T21:32:09",
+    "moved_out": -61,
+    "actual_return": 59,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 65,
+    "timestamp": "2026-08-23T21:32:11",
+    "moved_out": -65,
+    "actual_return": 63,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 68,
+    "timestamp": "2026-08-23T21:32:12",
+    "moved_out": -68,
+    "actual_return": 66,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 71,
+    "timestamp": "2026-08-23T21:32:14",
+    "moved_out": -71,
+    "actual_return": 69,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 75,
+    "timestamp": "2026-08-23T21:32:16",
+    "moved_out": -75,
+    "actual_return": 73,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 78,
+    "timestamp": "2026-08-23T21:32:17",
+    "moved_out": -78,
+    "actual_return": 77,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 82,
+    "timestamp": "2026-08-23T21:32:19",
+    "moved_out": -82,
+    "actual_return": 82,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 85,
+    "timestamp": "2026-08-23T21:32:21",
+    "moved_out": -85,
+    "actual_return": 85,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 88,
+    "timestamp": "2026-08-23T21:32:22",
+    "moved_out": -88,
+    "actual_return": 87,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 92,
+    "timestamp": "2026-08-23T21:32:24",
+    "moved_out": -92,
+    "actual_return": 91,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 95,
+    "timestamp": "2026-08-23T21:32:26",
+    "moved_out": -95,
+    "actual_return": 94,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 99,
+    "timestamp": "2026-08-23T21:32:28",
+    "moved_out": -99,
+    "actual_return": 97,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 102,
+    "timestamp": "2026-08-23T21:32:30",
+    "moved_out": -102,
+    "actual_return": 101,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 105,
+    "timestamp": "2026-08-23T21:32:32",
+    "moved_out": -105,
+    "actual_return": 105,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 109,
+    "timestamp": "2026-08-23T21:32:34",
+    "moved_out": -109,
+    "actual_return": 109,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 112,
+    "timestamp": "2026-08-23T21:32:36",
+    "moved_out": -112,
+    "actual_return": 112,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 116,
+    "timestamp": "2026-08-23T21:32:38",
+    "moved_out": -116,
+    "actual_return": 116,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 119,
+    "timestamp": "2026-08-23T21:32:40",
+    "moved_out": -119,
+    "actual_return": 119,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 122,
+    "timestamp": "2026-08-23T21:32:43",
+    "moved_out": -122,
+    "actual_return": 122,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 126,
+    "timestamp": "2026-08-23T21:32:45",
+    "moved_out": -126,
+    "actual_return": 126,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 129,
+    "timestamp": "2026-08-23T21:32:47",
+    "moved_out": -129,
+    "actual_return": 129,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 133,
+    "timestamp": "2026-08-23T21:32:49",
+    "moved_out": -133,
+    "actual_return": 133,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 136,
+    "timestamp": "2026-08-23T21:32:52",
+    "moved_out": -136,
+    "actual_return": 136,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 139,
+    "timestamp": "2026-08-23T21:32:54",
+    "moved_out": -139,
+    "actual_return": 139,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 143,
+    "timestamp": "2026-08-23T21:32:57",
+    "moved_out": -143,
+    "actual_return": 143,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 146,
+    "timestamp": "2026-08-23T21:32:59",
+    "moved_out": -146,
+    "actual_return": 145,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 150,
+    "timestamp": "2026-08-23T21:33:02",
+    "moved_out": -150,
+    "actual_return": 149,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 153,
+    "timestamp": "2026-08-23T21:33:04",
+    "moved_out": -153,
+    "actual_return": 152,
+    "discrepancy": 1
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 156,
+    "timestamp": "2026-08-23T21:33:07",
+    "moved_out": -156,
+    "actual_return": 154,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 160,
+    "timestamp": "2026-08-23T21:33:10",
+    "moved_out": -160,
+    "actual_return": 158,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 163,
+    "timestamp": "2026-08-23T21:33:12",
+    "moved_out": -163,
+    "actual_return": 161,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 167,
+    "timestamp": "2026-08-23T21:33:15",
+    "moved_out": -167,
+    "actual_return": 165,
+    "discrepancy": 2
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 170,
+    "timestamp": "2026-08-23T21:33:18",
+    "moved_out": -170,
+    "actual_return": 168,
+    "discrepancy": 2
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 20,
+    "timestamp": "2026-08-23T21:33:21",
+    "moved_out": 20,
+    "actual_return": 15,
+    "discrepancy": 5
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 40,
+    "timestamp": "2026-08-23T21:33:22",
+    "moved_out": 40,
+    "actual_return": 41,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 60,
+    "timestamp": "2026-08-23T21:33:23",
+    "moved_out": 60,
+    "actual_return": 60,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 80,
+    "timestamp": "2026-08-23T21:33:24",
+    "moved_out": 80,
+    "actual_return": 80,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 100,
+    "timestamp": "2026-08-23T21:33:26",
+    "moved_out": 100,
+    "actual_return": 101,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 120,
+    "timestamp": "2026-08-23T21:33:28",
+    "moved_out": 120,
+    "actual_return": 119,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 141,
+    "timestamp": "2026-08-23T21:33:30",
+    "moved_out": 141,
+    "actual_return": 142,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 161,
+    "timestamp": "2026-08-23T21:33:33",
+    "moved_out": 161,
+    "actual_return": 161,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 181,
+    "timestamp": "2026-08-23T21:33:35",
+    "moved_out": 181,
+    "actual_return": 181,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 201,
+    "timestamp": "2026-08-23T21:33:38",
+    "moved_out": 201,
+    "actual_return": 201,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 221,
+    "timestamp": "2026-08-23T21:33:42",
+    "moved_out": 221,
+    "actual_return": 221,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 241,
+    "timestamp": "2026-08-23T21:33:45",
+    "moved_out": 241,
+    "actual_return": 241,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 261,
+    "timestamp": "2026-08-23T21:33:49",
+    "moved_out": 261,
+    "actual_return": 261,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 281,
+    "timestamp": "2026-08-23T21:33:52",
+    "moved_out": 281,
+    "actual_return": 281,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 301,
+    "timestamp": "2026-08-23T21:33:56",
+    "moved_out": 301,
+    "actual_return": 302,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 321,
+    "timestamp": "2026-08-23T21:34:01",
+    "moved_out": 321,
+    "actual_return": 321,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 341,
+    "timestamp": "2026-08-23T21:34:05",
+    "moved_out": 341,
+    "actual_return": 341,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 361,
+    "timestamp": "2026-08-23T21:34:10",
+    "moved_out": 361,
+    "actual_return": 361,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 382,
+    "timestamp": "2026-08-23T21:34:15",
+    "moved_out": 382,
+    "actual_return": 382,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 402,
+    "timestamp": "2026-08-23T21:34:20",
+    "moved_out": 402,
+    "actual_return": 402,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 422,
+    "timestamp": "2026-08-23T21:34:25",
+    "moved_out": 422,
+    "actual_return": 422,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 442,
+    "timestamp": "2026-08-23T21:34:31",
+    "moved_out": 442,
+    "actual_return": 441,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 462,
+    "timestamp": "2026-08-23T21:34:36",
+    "moved_out": 462,
+    "actual_return": 462,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 482,
+    "timestamp": "2026-08-23T21:34:42",
+    "moved_out": 482,
+    "actual_return": 482,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 502,
+    "timestamp": "2026-08-23T21:34:48",
+    "moved_out": 502,
+    "actual_return": 502,
+    "discrepancy": 0
+  },
+  {
+    "axis": "D",
+    "direction": "-",
+    "commanded": 34,
+    "timestamp": "2026-08-23T22:15:21",
+    "moved_out": -34,
+    "actual_return": 34,
+    "discrepancy": 0
+  },
+  {
+    "axis": "B",
+    "direction": "-",
+    "commanded": 3,
+    "timestamp": "2026-08-23T21:39:05",
+    "moved_out": -3,
+    "actual_return": 4,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 10,
+    "timestamp": "2026-08-23T21:49:03",
+    "moved_out": 10,
+    "actual_return": 9,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 30,
+    "timestamp": "2026-08-23T21:49:04",
+    "moved_out": 30,
+    "actual_return": 24,
+    "discrepancy": 6
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 50,
+    "timestamp": "2026-08-23T21:49:05",
+    "moved_out": 50,
+    "actual_return": 51,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 70,
+    "timestamp": "2026-08-23T21:49:06",
+    "moved_out": 70,
+    "actual_return": 69,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 90,
+    "timestamp": "2026-08-23T21:49:07",
+    "moved_out": 90,
+    "actual_return": 90,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 110,
+    "timestamp": "2026-08-23T21:49:09",
+    "moved_out": 110,
+    "actual_return": 110,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 131,
+    "timestamp": "2026-08-23T21:49:11",
+    "moved_out": 131,
+    "actual_return": 132,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 151,
+    "timestamp": "2026-08-23T21:49:14",
+    "moved_out": 151,
+    "actual_return": 151,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 171,
+    "timestamp": "2026-08-23T21:49:16",
+    "moved_out": 171,
+    "actual_return": 171,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 191,
+    "timestamp": "2026-08-23T21:49:19",
+    "moved_out": 191,
+    "actual_return": 191,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 211,
+    "timestamp": "2026-08-23T21:49:22",
+    "moved_out": 211,
+    "actual_return": 211,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 231,
+    "timestamp": "2026-08-23T21:49:25",
+    "moved_out": 231,
+    "actual_return": 231,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 251,
+    "timestamp": "2026-08-23T21:49:29",
+    "moved_out": 251,
+    "actual_return": 251,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 271,
+    "timestamp": "2026-08-23T21:49:33",
+    "moved_out": 271,
+    "actual_return": 271,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 291,
+    "timestamp": "2026-08-23T21:49:37",
+    "moved_out": 291,
+    "actual_return": 291,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 311,
+    "timestamp": "2026-08-23T21:49:41",
+    "moved_out": 311,
+    "actual_return": 311,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 331,
+    "timestamp": "2026-08-23T21:49:45",
+    "moved_out": 331,
+    "actual_return": 331,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 351,
+    "timestamp": "2026-08-23T21:49:50",
+    "moved_out": 351,
+    "actual_return": 351,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 371,
+    "timestamp": "2026-08-23T21:49:54",
+    "moved_out": 371,
+    "actual_return": 371,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 392,
+    "timestamp": "2026-08-23T21:49:59",
+    "moved_out": 392,
+    "actual_return": 392,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 412,
+    "timestamp": "2026-08-23T21:50:05",
+    "moved_out": 412,
+    "actual_return": 412,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 432,
+    "timestamp": "2026-08-23T21:50:10",
+    "moved_out": 432,
+    "actual_return": 432,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 452,
+    "timestamp": "2026-08-23T21:50:16",
+    "moved_out": 452,
+    "actual_return": 452,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 472,
+    "timestamp": "2026-08-23T21:50:21",
+    "moved_out": 472,
+    "actual_return": 472,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "-",
+    "commanded": 492,
+    "timestamp": "2026-08-23T21:50:27",
+    "moved_out": 492,
+    "actual_return": 492,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 10,
+    "timestamp": "2026-08-23T22:16:03",
+    "moved_out": -10,
+    "actual_return": 9,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 20,
+    "timestamp": "2026-08-23T22:16:04",
+    "moved_out": -20,
+    "actual_return": 17,
+    "discrepancy": 3
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 30,
+    "timestamp": "2026-08-23T22:16:05",
+    "moved_out": -30,
+    "actual_return": 31,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 40,
+    "timestamp": "2026-08-23T22:16:12",
+    "moved_out": -40,
+    "actual_return": 39,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 50,
+    "timestamp": "2026-08-23T22:16:13",
+    "moved_out": -50,
+    "actual_return": 51,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 60,
+    "timestamp": "2026-08-23T22:16:15",
+    "moved_out": -60,
+    "actual_return": 59,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 70,
+    "timestamp": "2026-08-23T22:16:16",
+    "moved_out": -70,
+    "actual_return": 72,
+    "discrepancy": -2
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 80,
+    "timestamp": "2026-08-23T22:16:18",
+    "moved_out": -80,
+    "actual_return": 79,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 90,
+    "timestamp": "2026-08-23T22:16:19",
+    "moved_out": -90,
+    "actual_return": 91,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 100,
+    "timestamp": "2026-08-23T22:16:21",
+    "moved_out": -100,
+    "actual_return": 100,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 110,
+    "timestamp": "2026-08-23T22:16:23",
+    "moved_out": -110,
+    "actual_return": 110,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 120,
+    "timestamp": "2026-08-23T22:16:25",
+    "moved_out": -120,
+    "actual_return": 120,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 131,
+    "timestamp": "2026-08-23T22:16:27",
+    "moved_out": -131,
+    "actual_return": 131,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 141,
+    "timestamp": "2026-08-23T22:16:30",
+    "moved_out": -141,
+    "actual_return": 141,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 151,
+    "timestamp": "2026-08-23T22:16:32",
+    "moved_out": -151,
+    "actual_return": 151,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 161,
+    "timestamp": "2026-08-23T22:16:35",
+    "moved_out": -161,
+    "actual_return": 161,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 171,
+    "timestamp": "2026-08-23T22:16:37",
+    "moved_out": -171,
+    "actual_return": 171,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 181,
+    "timestamp": "2026-08-23T22:16:40",
+    "moved_out": -181,
+    "actual_return": 181,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 191,
+    "timestamp": "2026-08-23T22:16:43",
+    "moved_out": -191,
+    "actual_return": 191,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 201,
+    "timestamp": "2026-08-23T22:16:46",
+    "moved_out": -201,
+    "actual_return": 201,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 211,
+    "timestamp": "2026-08-23T22:16:49",
+    "moved_out": -211,
+    "actual_return": 211,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 221,
+    "timestamp": "2026-08-23T22:16:52",
+    "moved_out": -221,
+    "actual_return": 221,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 231,
+    "timestamp": "2026-08-23T22:16:56",
+    "moved_out": -231,
+    "actual_return": 231,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 241,
+    "timestamp": "2026-08-23T22:16:59",
+    "moved_out": -241,
+    "actual_return": 241,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 251,
+    "timestamp": "2026-08-23T22:17:03",
+    "moved_out": -251,
+    "actual_return": 251,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 261,
+    "timestamp": "2026-08-23T22:17:06",
+    "moved_out": -261,
+    "actual_return": 261,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 271,
+    "timestamp": "2026-08-23T22:17:10",
+    "moved_out": -271,
+    "actual_return": 271,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 281,
+    "timestamp": "2026-08-23T22:17:14",
+    "moved_out": -281,
+    "actual_return": 281,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 291,
+    "timestamp": "2026-08-23T22:17:18",
+    "moved_out": -291,
+    "actual_return": 291,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 301,
+    "timestamp": "2026-08-23T22:17:22",
+    "moved_out": -301,
+    "actual_return": 301,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 311,
+    "timestamp": "2026-08-23T22:17:27",
+    "moved_out": -311,
+    "actual_return": 311,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 321,
+    "timestamp": "2026-08-23T22:17:31",
+    "moved_out": -321,
+    "actual_return": 321,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 331,
+    "timestamp": "2026-08-23T22:17:36",
+    "moved_out": -331,
+    "actual_return": 331,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 341,
+    "timestamp": "2026-08-23T22:17:40",
+    "moved_out": -341,
+    "actual_return": 341,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 351,
+    "timestamp": "2026-08-23T22:17:45",
+    "moved_out": -351,
+    "actual_return": 351,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 361,
+    "timestamp": "2026-08-23T22:17:50",
+    "moved_out": -361,
+    "actual_return": 361,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 371,
+    "timestamp": "2026-08-23T22:17:54",
+    "moved_out": -371,
+    "actual_return": 371,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 382,
+    "timestamp": "2026-08-23T22:17:59",
+    "moved_out": -382,
+    "actual_return": 382,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 392,
+    "timestamp": "2026-08-23T22:18:05",
+    "moved_out": -392,
+    "actual_return": 392,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 402,
+    "timestamp": "2026-08-23T22:18:10",
+    "moved_out": -402,
+    "actual_return": 402,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 412,
+    "timestamp": "2026-08-23T22:18:15",
+    "moved_out": -412,
+    "actual_return": 412,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 422,
+    "timestamp": "2026-08-23T22:18:20",
+    "moved_out": -422,
+    "actual_return": 422,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 432,
+    "timestamp": "2026-08-23T22:18:26",
+    "moved_out": -432,
+    "actual_return": 432,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 442,
+    "timestamp": "2026-08-23T22:18:31",
+    "moved_out": -442,
+    "actual_return": 442,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 452,
+    "timestamp": "2026-08-23T22:18:37",
+    "moved_out": -452,
+    "actual_return": 453,
+    "discrepancy": -1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 462,
+    "timestamp": "2026-08-23T22:18:43",
+    "moved_out": -462,
+    "actual_return": 466,
+    "discrepancy": -4
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 472,
+    "timestamp": "2026-08-23T22:18:49",
+    "moved_out": -472,
+    "actual_return": 471,
+    "discrepancy": 1
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 482,
+    "timestamp": "2026-08-23T22:18:55",
+    "moved_out": -482,
+    "actual_return": 482,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 492,
+    "timestamp": "2026-08-23T22:19:01",
+    "moved_out": -492,
+    "actual_return": 492,
+    "discrepancy": 0
+  },
+  {
+    "axis": "E",
+    "direction": "+",
+    "commanded": 502,
+    "timestamp": "2026-08-23T22:19:07",
+    "moved_out": -502,
+    "actual_return": 501,
+    "discrepancy": 1
+  }
+]

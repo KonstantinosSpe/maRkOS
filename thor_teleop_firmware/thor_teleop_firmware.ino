@@ -70,7 +70,12 @@
                  nothing. Use this to confirm wiring/polarity by hand
                  before trusting HOME <axis> to move anything.
     HOME D/B/E   actually drives that axis to its beacon (bounded search,
-                 see doHome()) and zeros its position counter there.
+                 see doHome()) and zeros its position counter there. The
+                 success line reports steps=<n>, the actual number of
+                 steps the search took — compare that against a known
+                 commanded distance to measure real step accuracy at a
+                 given point in the range (see step-accuracy-calibration
+                 branch / calibrate_steps.py).
                  D has NO working hardware limit switch (LIM_D never
                  reliably triggers) — its search and every other D move
                  (JOG, MOVE) are clamped in software instead
@@ -136,6 +141,20 @@ const bool HOME_D_ACTIVE_HIGH = true;    // confirmed by hand: HIGH = at home
 // still disarmed on the Python side (HW_CALIBRATED_A = False). Add one here
 // the same way if that ever changes.
 
+// ── B's software position clamp ──────────────────────────────────────────
+// B's home is at one edge (the near/'+' side), backed up by the real,
+// working LIM_B hardware switch — so unlike D, the '+' direction already
+// has a genuine hardware backstop. The FAR edge ('-' direction, into the
+// usable range) has no switch at all though, and its true physical extent
+// is now known directly (measured by hand: 180 steps edge-to-edge) rather
+// than assumed from the code's separate J3 soft-angle-limit (~245 steps,
+// which turned out to be well past the real mechanical range — exactly
+// what caused the 51-step discrepancy at the 245-step calibration point,
+// it was grinding against the far hard stop for the excess). 10-step
+// margin subtracted off each end.
+const long B_SOFT_MIN = -170;
+const long B_SOFT_MAX = 10;
+
 // ── D's software position clamp ──────────────────────────────────────────
 // LIM_D (pin 48, in the original limit-switch block above) does not
 // reliably trigger — confirmed by hand-testing, it never fired even well
@@ -170,10 +189,21 @@ const long HOME_SEARCH_D_PLUS  = 3500;
 const long HOME_SEARCH_D_MINUS = 3500;
 // B's is a generous guess since its beacon sits at an edge and LIM_B works
 // as a real backstop either way. E's covers a bit over one full rotation
-// (2200 steps = 360°), since direction doesn't matter for a beacon on a
-// continuous twist.
+// (2200 steps = 360°) — E's search picks a starting direction based on
+// estimated shortest path (see doHomeSearch's E branch) rather than always
+// searching the same way, but still needs a bound generous enough to find
+// the beacon even if that estimate is wrong and it has to fall back.
 const long HOME_SEARCH_B       = 2000;
-const long HOME_SEARCH_E       = 2300;
+// Directly measured via SWEEP E+/E- (a real full lap, home to home): 1003
+// steps forward, 1004 back. The old 2200 figure (inherited from an early,
+// never-reverified calibration note) was wrong by more than 2x — this is
+// what caused HOME E's shortest-path estimate to misbehave specifically
+// once magnitudes approached and passed the true ~1003-step lap. Using
+// the average, rounded; the 1-step/0.1% difference between directions
+// isn't worth modeling separately. stepsPerDegE in mark1os.py is derived
+// from this too (1004/360 ~= 2.79, not the old 6.11) — see that file.
+const long E_FULL_ROTATION     = 1004;
+const long HOME_SEARCH_E       = 1300;   // full lap + generous margin
 
 // ── Ramp speed range (microseconds between pulse edges). BIGGER = SLOWER.
 // Starts/ends slow, cruises fast. Was Markos_basic.ino's own 2200/900
@@ -229,7 +259,7 @@ void setup() {
   gripper.write(gripAngle);
 
   Serial.println("[fw] thor_teleop_firmware ready (direct-drive rebuild)");
-  Serial.println("[fw] JOG A+/A-/B+/B-/D+/D-/E+/E-/G+/G-   CAL A/B/D/E, CAL STOP   JOGSTEP <n>   SPEED <vmin> <vmax>   HOME?   HOME D/B/E");
+  Serial.println("[fw] JOG A+/A-/B+/B-/D+/D-/E+/E-/G+/G-   CAL A/B/D/E, CAL STOP   JOGSTEP <n>   SPEED <vmin> <vmax>   HOME?   HOME D/B/E   SWEEP E+/E-");
 }
 
 // ── Ramp shape — identical logic to Markos_basic.ino's rampDelay() ──────────
@@ -244,6 +274,26 @@ int rampDelay(long i, long N) {
   if (t < 0) t = 0;
   if (t > 1) t = 1;
   return (int)(VMIN_US + (VMAX_US - VMIN_US) * t);
+}
+
+// Moves exactly the requested step count with no limit/beacon check at
+// all — used only where the point is to deliberately move OUT of a
+// sensor's own trigger zone before starting a real, checked search. Using
+// moveOne() with that same sensor as limPin for this doesn't work: the
+// per-step check runs before any movement, so if already inside the zone
+// it sees "triggered" on the very first check and stops at 0 steps,
+// unable to ever leave. Small, fixed-distance use only — no safety net,
+// so this must never be used for anything but a short, known-safe nudge.
+long blindMove(int stepPin, int dirPin, long steps) {
+  bool fwd = (steps >= 0);
+  digitalWrite(dirPin, fwd ? HIGH : LOW);
+  long N = labs(steps);
+  for (long i = 0; i < N; i++) {
+    int d = rampDelay(i, N);
+    digitalWrite(stepPin, HIGH); delayMicroseconds(d);
+    digitalWrite(stepPin, LOW);  delayMicroseconds(d);
+  }
+  return steps;
 }
 
 bool limitTriggered(int pin, bool inverted) {
@@ -299,20 +349,30 @@ long moveOne(int stepPin, int dirPin, long steps, int limPin, bool limInverted,
 }
 
 // Upper elbow: both motors together, mirrored, sharing LIM_B as the limit.
-// The 1-argument overload is unchanged JOG/MOVE behavior. The 3-argument
-// overload adds a second stop condition on top of LIM_B — used by homing to
-// stop the instant HOME_B triggers. Two overloads, not a default argument —
-// same Arduino auto-prototype reason as moveOne() above.
+// Three overloads, not default arguments — same Arduino auto-prototype
+// reason as moveOne() above:
+//   1-arg:  unchanged JOG/MOVE behavior, no extra beacon check, no clamp.
+//   3-arg:  adds a second stop condition on top of LIM_B — used by homing
+//           to stop the instant HOME_B triggers.
+//   6-arg:  additionally adds the B_SOFT_MIN/MAX position clamp (pass
+//           startPos = posB to enable it) — used everywhere now, JOG/MOVE
+//           included, so B can't be driven past its real 180-step range
+//           no matter which command drives it.
 long moveUpperElbow(long steps) {
-  return moveUpperElbow(steps, -1, false);
+  return moveUpperElbow(steps, -1, false, 0, NO_SOFT_LIMIT_MIN, NO_SOFT_LIMIT_MAX);
 }
 long moveUpperElbow(long steps, int extraPin, bool extraActiveHigh) {
+  return moveUpperElbow(steps, extraPin, extraActiveHigh, 0, NO_SOFT_LIMIT_MIN, NO_SOFT_LIMIT_MAX);
+}
+long moveUpperElbow(long steps, int extraPin, bool extraActiveHigh,
+                     long startPos, long softMin, long softMax) {
   bool fwd = (steps >= 0);
   digitalWrite(DIR_B, fwd ? HIGH : LOW);
   bool cFwd = MIRROR_C ? !fwd : fwd;
   digitalWrite(DIR_C, cFwd ? HIGH : LOW);
   long N = labs(steps);
   long done = 0;
+  long pos = startPos;
   for (long i = 0; i < N; i++) {
     if (limitTriggered(LIM_B, false)) {
       Serial.println("[fw] LIMIT HIT mid-move - stopping early");
@@ -322,12 +382,18 @@ long moveUpperElbow(long steps, int extraPin, bool extraActiveHigh) {
       Serial.println("[fw] HOME BEACON HIT mid-move - stopping early");
       break;
     }
+    long nextPos = pos + (fwd ? 1 : -1);
+    if (nextPos < softMin || nextPos > softMax) {
+      Serial.println("[fw] SOFT LIMIT HIT mid-move - stopping early");
+      break;
+    }
     int d = rampDelay(i, N);
     digitalWrite(STEP_B, HIGH); digitalWrite(STEP_C, HIGH);
     delayMicroseconds(d);
     digitalWrite(STEP_B, LOW); digitalWrite(STEP_C, LOW);
     delayMicroseconds(d);
     done += fwd ? 1 : -1;
+    pos = nextPos;
   }
   return done;
 }
@@ -354,7 +420,9 @@ void doJog(char axis, float dir) {
   long moved = 0;
   switch (axis) {
     case 'A': moved = moveOne(STEP_A, DIR_A, steps, LIM_A, false); posA += moved; break;
-    case 'B': moved = moveUpperElbow(B_DIR_FLIP ? -steps : steps); posB += moved; break;
+    case 'B': moved = moveUpperElbow(B_DIR_FLIP ? -steps : steps, -1, false,
+                                      posB, B_SOFT_MIN, B_SOFT_MAX);
+              posB += moved; break;
     case 'D': moved = moveOne(STEP_D, DIR_D, D_DIR_FLIP ? -steps : steps, LIM_D, false,
                                posD, D_SOFT_MIN, D_SOFT_MAX);
               posD += moved; break;
@@ -369,13 +437,15 @@ void doJog(char axis, float dir) {
 
 // Drives one axis to its home beacon and zeros its position counter there.
 // Bounded search, never an unbounded seek:
-//   D: already clamped to D_SOFT_MIN/MAX by moveOne (see the constants above)
-//      no matter which way it searches, so trying '+' first and, if not
-//      found, retracing to the start and trying '-' is safe by construction.
+//   D: picks whichever direction posD's sign says is actually shorter
+//      (home is centered, not at an edge, so this isn't a fixed guess)
+//      and falls back to the other direction if that estimate is wrong —
+//      still safe regardless, since D_SOFT_MIN/MAX clamps every move.
 //   B: single bounded search toward the edge beacon; LIM_B is still checked
 //      as a real hardware backstop the whole time.
-//   E: single bounded search covering a bit over one full rotation, since
-//      direction doesn't matter on a continuous twist.
+//   E: picks whichever direction is shorter from posE mod one full lap
+//      (E_FULL_ROTATION), same idea as D but circular — see its own branch
+//      below for why a fixed direction doesn't work for a continuous twist.
 // Any axis not already at home when this is called; if the beacon isn't
 // found within the bound, it's reported and the axis is returned to where
 // it started — never left stranded out at a search boundary.
@@ -389,26 +459,43 @@ void doJog(char axis, float dir) {
 void doHomeSearch(char axis) {
   if (axis == 'D') {
     if (homeTriggered(HOME_D, HOME_D_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME D already at home");
+      Serial.println("[fw] HOME D already at home, steps=0");
       posD = 0;
       return;
     }
-    long moved = moveOne(STEP_D, DIR_D, HOME_SEARCH_D_PLUS, HOME_D, HOME_D_ACTIVE_HIGH,
+    // D's home is centered (0), not at an edge, so which direction is
+    // actually shorter depends entirely on which side of 0 posD is
+    // currently on — always trying '+' first (like an earlier version
+    // did) meant every '+'-side test point's return search needlessly
+    // travelled all the way out to D_SOFT_MAX before reversing and
+    // finding it going '-'. Simpler than E's mod-based estimate since D
+    // isn't circular: negative posD means home is toward '+', positive
+    // means home is toward '-'.
+    bool searchPositive = (posD < 0);
+    long primaryReq = searchPositive ? HOME_SEARCH_D_PLUS : -HOME_SEARCH_D_MINUS;
+    long moved = moveOne(STEP_D, DIR_D, primaryReq, HOME_D, HOME_D_ACTIVE_HIGH,
                           posD, D_SOFT_MIN, D_SOFT_MAX);
     posD += moved;
     if (homeTriggered(HOME_D, HOME_D_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME D found (+), zeroed");
+      Serial.print("[fw] HOME D found (");
+      Serial.print(searchPositive ? "+" : "-");
+      Serial.print("), zeroed, steps=");
+      Serial.println(labs(moved));
       posD = 0;
       return;
     }
     long back = moveOne(STEP_D, DIR_D, -moved, HOME_D, HOME_D_ACTIVE_HIGH,
                          posD, D_SOFT_MIN, D_SOFT_MAX);
     posD += back;
-    moved = moveOne(STEP_D, DIR_D, -HOME_SEARCH_D_MINUS, HOME_D, HOME_D_ACTIVE_HIGH,
+    long fallbackReq = searchPositive ? -HOME_SEARCH_D_MINUS : HOME_SEARCH_D_PLUS;
+    moved = moveOne(STEP_D, DIR_D, fallbackReq, HOME_D, HOME_D_ACTIVE_HIGH,
                      posD, D_SOFT_MIN, D_SOFT_MAX);
     posD += moved;
     if (homeTriggered(HOME_D, HOME_D_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME D found (-), zeroed");
+      Serial.print("[fw] HOME D found (");
+      Serial.print(searchPositive ? "-" : "+");
+      Serial.print(", fallback), zeroed, steps=");
+      Serial.println(labs(moved));
       posD = 0;
       return;
     }
@@ -419,35 +506,62 @@ void doHomeSearch(char axis) {
 
   } else if (axis == 'B') {
     if (homeTriggered(HOME_B, HOME_B_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME B already at home");
+      Serial.println("[fw] HOME B already at home, steps=0");
       posB = 0;
       return;
     }
-    long moved = moveUpperElbow(HOME_SEARCH_B, HOME_B, HOME_B_ACTIVE_HIGH);
+    long moved = moveUpperElbow(HOME_SEARCH_B, HOME_B, HOME_B_ACTIVE_HIGH,
+                                 posB, B_SOFT_MIN, B_SOFT_MAX);
     posB += moved;
     if (homeTriggered(HOME_B, HOME_B_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME B found, zeroed");
+      Serial.print("[fw] HOME B found, zeroed, steps=");
+      Serial.println(labs(moved));
       posB = 0;
     } else {
       Serial.println("[fw] HOME B FAILED - beacon not found within search range. Returning to start.");
-      long back = moveUpperElbow(-moved, HOME_B, HOME_B_ACTIVE_HIGH);
+      long back = moveUpperElbow(-moved, HOME_B, HOME_B_ACTIVE_HIGH,
+                                  posB, B_SOFT_MIN, B_SOFT_MAX);
       posB += back;
     }
 
   } else if (axis == 'E') {
     if (homeTriggered(HOME_E, HOME_E_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME E already at home");
+      Serial.println("[fw] HOME E already at home, steps=0");
       posE = 0;
       return;
     }
-    long moved = moveOne(STEP_E, DIR_E, HOME_SEARCH_E, HOME_E, HOME_E_ACTIVE_HIGH);
+    // E is a continuous rotation with no "proximal/distal" concept, so
+    // unlike D/B there's no reason to always search the same fixed
+    // direction — that's exactly what caused wildly inconsistent results
+    // during calibration (searching the long way around in some cases,
+    // failing to find it at all in others). Instead, estimate which
+    // direction is actually shorter from posE's accumulated position
+    // (mod one full rotation) and try that first, falling back to the
+    // other direction if the estimate turns out wrong — same
+    // try-then-fallback pattern as D's search above.
+    long offset = posE % E_FULL_ROTATION;
+    if (offset < 0) offset += E_FULL_ROTATION;
+    bool searchPositive = (offset > E_FULL_ROTATION / 2);
+    long primary = searchPositive ? HOME_SEARCH_E : -HOME_SEARCH_E;
+    long moved = moveOne(STEP_E, DIR_E, primary, HOME_E, HOME_E_ACTIVE_HIGH);
     posE += moved;
     if (homeTriggered(HOME_E, HOME_E_ACTIVE_HIGH)) {
-      Serial.println("[fw] HOME E found, zeroed");
+      Serial.print("[fw] HOME E found, zeroed, steps=");
+      Serial.println(labs(moved));
+      posE = 0;
+      return;
+    }
+    long back = moveOne(STEP_E, DIR_E, -moved, HOME_E, HOME_E_ACTIVE_HIGH);
+    posE += back;
+    moved = moveOne(STEP_E, DIR_E, -primary, HOME_E, HOME_E_ACTIVE_HIGH);
+    posE += moved;
+    if (homeTriggered(HOME_E, HOME_E_ACTIVE_HIGH)) {
+      Serial.print("[fw] HOME E found (fallback direction), zeroed, steps=");
+      Serial.println(labs(moved));
       posE = 0;
     } else {
-      Serial.println("[fw] HOME E FAILED - beacon not found within one full rotation. Returning to start.");
-      long back = moveOne(STEP_E, DIR_E, -moved, HOME_E, HOME_E_ACTIVE_HIGH);
+      Serial.println("[fw] HOME E FAILED - beacon not found either direction. Returning to start.");
+      back = moveOne(STEP_E, DIR_E, -moved, HOME_E, HOME_E_ACTIVE_HIGH);
       posE += back;
     }
 
@@ -461,6 +575,52 @@ void doHome(char axis) {
   VMIN_US = HOME_VMIN_US;
   VMAX_US = HOME_VMAX_US;
   doHomeSearch(axis);
+  VMIN_US = savedVMin;
+  VMAX_US = savedVMax;
+}
+
+// SWEEP E+ / SWEEP E- — measures a genuine full lap: forces the search in
+// the exact requested direction regardless of what looks shorter (unlike
+// HOME E, which now picks whichever direction its position estimate says
+// is closer — the right choice for normal homing, but wrong for this,
+// where the point is to go all the way around on purpose and see how many
+// steps a real full rotation actually takes). Meant to be called starting
+// from home; if it isn't, the reported count won't mean "one lap."
+void doSweepE(int dir) {
+  int savedVMin = VMIN_US, savedVMax = VMAX_US;
+  VMIN_US = HOME_VMIN_US;
+  VMAX_US = HOME_VMAX_US;
+
+  // If we're starting right at home (the normal case — this is meant to
+  // be called right after HOME E), the beacon's own trigger zone is still
+  // active. blindMove ignores the beacon entirely for this fixed 100-step
+  // nudge — using moveOne() with HOME_E as its own limPin here doesn't
+  // work, since it would check (and immediately trip on) the very zone
+  // it's trying to leave, stopping at 0 steps before moving at all.
+  long cleared = 0;
+  if (homeTriggered(HOME_E, HOME_E_ACTIVE_HIGH)) {
+    cleared = blindMove(STEP_E, DIR_E, dir * 100);
+    posE += cleared;
+    if (homeTriggered(HOME_E, HOME_E_ACTIVE_HIGH)) {
+      Serial.println("[fw] SWEEP E FAILED - still inside the beacon zone after clearing 100 steps; zone wider than expected.");
+      VMIN_US = savedVMin;
+      VMAX_US = savedVMax;
+      return;
+    }
+  }
+
+  long request = dir * (E_FULL_ROTATION + 300);  // generous margin past one full lap
+  long moved = moveOne(STEP_E, DIR_E, request, HOME_E, HOME_E_ACTIVE_HIGH);
+  posE += moved;
+  long total = labs(cleared) + labs(moved);
+  if (homeTriggered(HOME_E, HOME_E_ACTIVE_HIGH)) {
+    Serial.print("[fw] SWEEP E found, zeroed, steps=");
+    Serial.println(total);
+    posE = 0;
+  } else {
+    Serial.println("[fw] SWEEP E FAILED - beacon not found within one full lap plus margin.");
+  }
+
   VMIN_US = savedVMin;
   VMAX_US = savedVMax;
 }
@@ -491,6 +651,18 @@ void applyLine(const String& rawLine) {
     Serial.print(homeTriggered(HOME_B, HOME_B_ACTIVE_HIGH) ? "YES" : "no");
     Serial.print(" D=");
     Serial.println(homeTriggered(HOME_D, HOME_D_ACTIVE_HIGH) ? "YES" : "no");
+    return;
+  }
+
+  if (line.startsWith("SWEEP ")) {
+    // "SWEEP E+" / "SWEEP E-" — see doSweepE()'s comment. Only meaningful
+    // for E (a continuous rotation); A/B/D don't have a "full lap".
+    String arg = line.substring(6);
+    if (arg.length() == 2 && arg[0] == 'E' && (arg[1] == '+' || arg[1] == '-')) {
+      doSweepE(arg[1] == '+' ? 1 : -1);
+    } else {
+      Serial.println("[fw] SWEEP: expected E+ or E-");
+    }
     return;
   }
 
@@ -557,7 +729,8 @@ void applyLine(const String& rawLine) {
           moved = moveOne(STEP_A, DIR_A, n, LIM_A, false);
           posA += moved;
         } else if (c == 'B') {
-          moved = moveUpperElbow(B_DIR_FLIP ? -n : n);
+          moved = moveUpperElbow(B_DIR_FLIP ? -n : n, -1, false,
+                                  posB, B_SOFT_MIN, B_SOFT_MAX);
           posB += moved;
         } else if (c == 'D') {
           moved = moveOne(STEP_D, DIR_D, D_DIR_FLIP ? -n : n, LIM_D, false,
