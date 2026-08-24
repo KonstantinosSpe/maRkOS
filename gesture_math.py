@@ -62,7 +62,11 @@ PINCH_OFF = 0.55    # and above which we consider it "released" — two
 GRIP_PINCH_ON = 0.45
 GRIP_PINCH_OFF = 0.70
 GRIP_SMOOTH = 0.30
-GRIP_CLOSED, GRIP_OPEN = 0.0, 90.0
+GRIP_CLOSED, GRIP_OPEN = 60.0, 105.0   # hand-tested on the real MG996R gripper:
+                                        # jogging past 60 toward closed starts
+                                        # straining against the mechanism, and
+                                        # 105 is a confirmed comfortable full
+                                        # open, not just a boot-default guess
 
 FIST_HOLD_S = 1.0     # how long a fist needs to be held before it toggles
                        # freeze/resume — long enough that it isn't tripped

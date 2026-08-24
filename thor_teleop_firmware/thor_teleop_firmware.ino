@@ -139,6 +139,16 @@ const int GRIP_PIN = 10;   // matches Markos_basic.ino — an earlier version
                             // visual check of the wiring before trusting
                             // this one either.
 
+// Hand-tested on the real MG996R gripper by jogging it in both directions:
+// past 60 degrees toward closed it starts straining against the mechanism,
+// and 105 is a confirmed comfortable full open. Both JOG G+/G- and the
+// absolute G<n> command clamp to this range below, the same way B_SOFT_MIN/
+// MAX and D_SOFT_MIN/MAX protect the other axes — nothing sent to this
+// servo, by hand or by gesture control, should be able to drive it into
+// the strain zone.
+const int GRIP_MIN = 60;
+const int GRIP_MAX = 105;
+
 // ── Homing beacons — separate from LIM_A/B/D/E above, which only stop a JOG/
 // MOVE early if hit mid-travel. These are dedicated optical endstops found
 // via pin_scanner.ino, driven by HOME? (status only) and HOME <axis>
@@ -242,7 +252,7 @@ const long MAX_JOG_STEPS = 20000;
 const float JOG_GRIP_DEG = 3.0;  // gripper degrees per JOG G+/G- press
 
 Servo gripper;
-int gripAngle = 90;
+int gripAngle = GRIP_MAX;   // boots open, ready to grab something
 
 // ── Net step counters per axis, for CAL — plain accumulation, no library ────
 long posA = 0, posB = 0, posD = 0, posE = 0;
@@ -737,8 +747,9 @@ void applyLine(const String& rawLine) {
   }
 
   if (line.length() >= 2 && line[0] == 'G' && (isDigit(line[1]))) {
-    // Absolute gripper set, e.g. "G0" or "G90" — distinct from "JOG G+/-".
-    gripAngle = constrain(line.substring(1).toInt(), 0, 180);
+    // Absolute gripper set, e.g. "G60" or "G105" — distinct from "JOG G+/-".
+    // Clamped to GRIP_MIN/MAX, same as every other axis's hand-tested range.
+    gripAngle = constrain(line.substring(1).toInt(), GRIP_MIN, GRIP_MAX);
     gripper.write(gripAngle);
     Serial.print("[fw] grip -> ");
     Serial.println(gripAngle);
@@ -777,7 +788,7 @@ void applyLine(const String& rawLine) {
       char axis = arg[0];
       float dir = (arg[1] == '+') ? 1.0 : -1.0;
       if (axis == 'G') {
-        gripAngle = constrain(gripAngle + (int)(dir * JOG_GRIP_DEG), 0, 180);
+        gripAngle = constrain(gripAngle + (int)(dir * JOG_GRIP_DEG), GRIP_MIN, GRIP_MAX);
         gripper.write(gripAngle);
         Serial.print("[fw] grip -> ");
         Serial.println(gripAngle);

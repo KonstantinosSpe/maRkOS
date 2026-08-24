@@ -152,10 +152,10 @@ class Mark1OS:
         self.cmd_height = SHOULDER_H + 10.0
         self.cmd_R = 160.0
         self.engaged = False
-        self.frozen = False   # starts out ready, with no un-lock gesture
-                               # needed — the per-axis HW_CALIBRATED_* flags
-                               # already gate real motion, so this is just
-                               # about the gesture loop's own on/off state
+        self.frozen = True    # starts frozen — a fist has to be held ~1s
+                               # before the very first move, rather than the
+                               # arm being ready to go the instant a hand is
+                               # detected on camera startup
         self.anchor = None
         self.gripper_pos = GRIP_OPEN
         self.grip_closing = False
@@ -273,7 +273,7 @@ class Mark1OS:
         wrap, body = self._section(parent, "Manual jog")
         wrap.pack(fill="x")
 
-        def axis_row(label: str, letter: str, cal: bool = True) -> None:
+        def axis_row(label: str, letter: str, cal: bool = True, grip: bool = False) -> None:
             r = tk.Frame(body, bg=PANEL)
             r.pack(fill="x", pady=3)
             tk.Label(r, text=label, bg=PANEL, fg=INK, font=self.f_body, width=18, anchor="w").pack(side="left")
@@ -281,12 +281,19 @@ class Mark1OS:
             self._flat_button(r, "+", lambda: self.send(f"JOG {letter}+")).pack(side="left", padx=2)
             if cal:
                 self._flat_button(r, "record", lambda l=letter: self.send(f"CAL {l}"), accent=AMBER).pack(side="left", padx=(8, 0))
+            if grip:
+                # Jump straight to the hand-tested open/closed positions
+                # instead of nudging 3 degrees at a time — the firmware
+                # clamps G<n> to GRIP_MIN/MAX anyway, so these can't
+                # overshoot even if the constants ever change.
+                self._flat_button(r, "Open", lambda: self.send(f"G{int(GRIP_OPEN)}"), accent=GO).pack(side="left", padx=(8, 2))
+                self._flat_button(r, "Close", lambda: self.send(f"G{int(GRIP_CLOSED)}"), accent=WARN).pack(side="left", padx=2)
 
         axis_row("A (mid-arm twist)", "A")
         axis_row("B (elbow, distal)", "B")
         axis_row("D (shoulder, proximal)", "D")
         axis_row("E (base twist)", "E")
-        axis_row("Gripper", "G", cal=False)
+        axis_row("Gripper", "G", cal=False, grip=True)
 
         distrow = tk.Frame(body, bg=PANEL)
         distrow.pack(fill="x", pady=3)
@@ -344,10 +351,11 @@ class Mark1OS:
         self.gesture_status = tk.Label(body, text="off", bg=PANEL, fg=MUTED, font=self.f_mono)
         self.gesture_status.pack(side="left", padx=(12, 0))
 
-        tk.Label(wrap, text="Pinch thumb+index to engage (hand offset = speed). "
+        tk.Label(wrap, text="Starts FROZEN — hold a fist ~1s to begin. Pinch "
+                            "thumb+index to engage (hand offset = speed). "
                             "Pinch thumb+pinky to toggle gripper. Hold a fist ~1s "
-                            "to freeze/resume. Real-arm output stays off until "
-                            "calibration is confirmed (see banner above).",
+                            "to freeze/resume anytime. Real-arm output stays off "
+                            "until calibration is confirmed (see banner above).",
                  bg=PANEL, fg=MUTED, font=self.f_body, anchor="w",
                  wraplength=380, justify="left").pack(fill="x", padx=12, pady=(0, 10))
 
@@ -597,11 +605,11 @@ class Mark1OS:
                 self.gesture_status.configure(text="off (failed to start)", fg=ALARM)
                 return
             self.last_t = time.time()
-            self.frozen = False
+            self.frozen = True
             self.gesture_btn.configure(text="Stop gesture control", fg=ALARM)
-            self.gesture_status.configure(text="listening — pinch thumb+index to engage", fg=GO)
-            self.write_log("Gesture control ON — ready immediately, no fist un-lock needed "
-                           "(hold a fist ~1s any time to freeze/resume)", "sys")
+            self.gesture_status.configure(text="FROZEN — hold a fist ~1s to begin", fg=WARN)
+            self.write_log("Gesture control ON — starting FROZEN, hold a fist ~1s to begin "
+                           "(hold again any time to freeze/resume)", "sys")
             self.root.after(15, self._gesture_tick)
         else:
             self._stop_gesture()
@@ -720,7 +728,12 @@ class Mark1OS:
                     if math.hypot(raw_dx, raw_dy) < ENGAGE_DEADZONE:
                         raw_dx = raw_dy = 0.0
                     ox = raw_dx * 2.0
-                    oy = raw_dy * 2.0
+                    # Negated: moving the hand up was driving height down and
+                    # vice versa at home. Flipped here, at the single source
+                    # both D and B/C's targets are computed from, so both
+                    # stay correctly matched to each other rather than
+                    # needing two separate firmware-side flips.
+                    oy = -raw_dy * 2.0
                     v_j1 = response(clamp(ox, -1, 1)) * MAX_J1_SPEED
                     v_h = response(clamp(oy, -1, 1)) * MAX_HEIGHT_SPEED
                     sc = (scale - self.anchor[2]) * REACH_GAIN
@@ -889,6 +902,14 @@ class Mark1OS:
         as before applies — never queue a second move behind one that's
         still executing.
 
+        The gripper doesn't fit that same pattern — there's no MOVE-style
+        relative delta for it, only the firmware's absolute G<n> command —
+        so instead of accumulating a delta, this just sends grip_target_deg
+        directly whenever it's changed since the last tick. gripper.write()
+        on the firmware side is instant regardless of whether the servo can
+        physically reach that angle, so there's no blocking/pacing concern
+        the way there is for the stepper axes.
+
         D (J3, the shoulder hinge) and B (J5, the elbow hinge) come from
         the same (height, reach) point via solve_reach_ik — they're the two
         joints of one 2-link IK solve, not two independent gestures. J3 is
@@ -965,6 +986,13 @@ class Mark1OS:
                 if HW_CALIBRATED_E:
                     self.move_out_e = True
                 self._emit_move("E", dE)
+
+        grip_angle = int(round(clamp(grip_target_deg, GRIP_CLOSED, GRIP_OPEN)))
+        if not hasattr(self, "_last_grip_sent"):
+            self._last_grip_sent = None
+        if grip_angle != self._last_grip_sent:
+            self._last_grip_sent = grip_angle
+            self.send(f"G{grip_angle}")
 
     def set_jog_step(self, n: int) -> None:
         """The single place JOGSTEP actually gets set, called from the
