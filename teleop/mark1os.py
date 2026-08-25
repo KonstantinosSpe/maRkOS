@@ -25,8 +25,8 @@ the GUI, plus the logic that ties those pieces together for a live
 session. If you're trying to work out which axis is safe to drive right
 now, hw_config.py's docstring is the place to look, not here.
 
-Requires: pip install opencv-python "mediapipe==0.10.9" numpy pyserial
-Run:      python mark1os.py     (or .venv\\Scripts\\python.exe mark1os.py)
+Requires: pip install -r requirements/teleop.txt  (Python 3.10 or 3.11: MediaPipe 0.10.9)
+Run:      python teleop/mark1os.py     (or .venv\\Scripts\\python.exe teleop\\mark1os.py)
 """
 
 import json
@@ -594,7 +594,7 @@ class Mark1OS:
                 traceback.print_exc()
                 self.write_log(f"[gesture] FAILED to start: {exc!r}", "err")
                 self.write_log("If this mentions mediapipe/protobuf, you're likely running "
-                               "with the wrong Python — use .venv\\Scripts\\python.exe mark1os.py",
+                               "with the wrong Python — use .venv\\Scripts\\python.exe teleop\\mark1os.py",
                                "err")
                 if self.cap is not None:
                     self.cap.release()

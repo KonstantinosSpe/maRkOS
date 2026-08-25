@@ -11,8 +11,8 @@ This is the "get the numbers first" step before building the full 1/50
 ladder test for E — the ladder's point spacing depends on knowing E's
 real full-rotation distance rather than assuming the old 2200 figure.
 
-Requires: pip install pyserial (already in .venv)
-Run:      .venv\\Scripts\\python.exe measure_e_rotation.py
+Requires: pip install pyserial (see requirements/teleop.txt)
+Run:      python teleop/tools/measure_e_rotation.py
 """
 
 import re

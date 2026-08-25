@@ -1,35 +1,58 @@
 #!/usr/bin/env python3
 """
-calibrate_steps_round2.py — targeted recheck + E's missing '+' side
-=======================================================================
-Second calibration pass, saved to its own dataset (step_accuracy_data_v2.json)
-rather than the round-1 file — same round-trip method as calibrate_steps.py
-(HOME -> MOVE N -> HOME, comparing commanded N against the real return
-distance), but a much smaller, deliberately targeted point set instead of
-the full 1/50 ladder:
+calibrate_steps.py — coarse step-accuracy sweep for D, B, E
+=============================================================
+Measures real step accuracy using the homing beacons as ground truth,
+instead of trusting the open-loop step counters blindly.
 
-  D  (-): 34, 68, 102, 136 — round 1's two flagged outliers (34, 68,
-     adjacent rungs 1-2 of that ladder) plus two more rungs beyond the
-     cluster on each side, to see whether the anomaly is localized or
-     part of a broader pattern. Rung 0 and below don't exist, so this
-     side is naturally clipped rather than symmetric.
-     Also 1530, 1564, 1598, 1632, 1666 — a THIRD outlier, found only
-     after combining round 1 + this file into the v3 "complete picture"
-     dataset: D-1598 (rung 47 of 50) came back discrepancy=-53, near the
-     far end of D's range where the two near-origin outliers' explanation
-     (the beacon's resolution floor) doesn't apply — this one needs its
-     own direct recheck, same +/-2-rungs pattern as before.
-  B  (-): 10, 14, 17, 20, 24 — rung 5 of that ladder (17, also flagged)
-     +/- 2 rungs.
-  E  (-): 50, 60, 70, 80, 90 — rung 7 of that ladder +/- 2 rungs.
-  E  (+): the FULL 50-point ladder up to 502 — round 1 only ever tested
-     E's '-' side; '+' was never covered at all. Safe to test now that
-     doHomeSearch's E branch picks whichever direction is actually
-     shorter rather than always searching '+' — the outbound direction
-     doesn't need to be handled as a special case anymore.
+For each test point (axis, direction, commanded magnitude):
+  1. HOME <axis>   — establish a true zero via the beacon.
+  2. MOVE <axis> N — travel exactly N commanded steps outward.
+  3. HOME <axis>   — search back to true zero; the ACTUAL number of
+                     steps that search takes is the real answer to
+                     "how far did the arm actually travel."
 
-Requires: pip install pyserial (already in .venv)
-Run:      .venv\\Scripts\\python.exe calibrate_steps_round2.py
+Comparing commanded N against the actual return distance reveals real
+step loss/gain at that point in the range — this is the raw data a
+future correction "matrix" would be built from. Results are saved
+after every point (not just at the end) to
+teleop/measurements/step_accuracy_data.json, so a
+run that's interrupted partway through doesn't lose anything already
+measured.
+
+Full systematic ladder (this version): 50 evenly spaced points per
+direction, at 1/50, 2/50, ... 50/50 of each direction's real, confirmed
+full range — not the earlier coarse hand-picked magnitude lists. Full
+ranges used, all directly hand-verified or measured, not assumed:
+  D: 1500 steps '+', 1700 steps '-' (D_SOFT_MAX/MIN — hand-tested safe
+     range, home is centered). Run '+' completely before starting '-'.
+  B: 170 steps '-' only (B_SOFT_MIN — home is at one edge, backed by the
+     real LIM_B hardware switch; real physical range is 180 steps
+     edge-to-edge, hand-measured, with a small margin subtracted).
+  E: 502 steps '-' only — HALF of the real measured full lap (1004 steps,
+     via the firmware's SWEEP E+/E-, replacing the old never-reverified
+     2200 assumption). Capped at half, not the full lap: past 180°, an
+     outbound '-' move retraces the same physical positions the long way
+     around instead of covering new ground, and it's exactly where the
+     return search's shortest-path estimate starts flip-flopping between
+     directions (confirmed — an earlier run testing past 502 produced
+     wild, inconsistent discrepancies right around there).
+
+B and E's outbound direction is '-' for the same reason as before: their
+homing search finds the beacon by searching '+', so '-' outbound is what
+puts the beacon on the short, direct path back (see doHomeSearch's E
+branch in the firmware for the exception — E's search is now smart about
+picking whichever direction is actually shorter, but the outbound test
+move itself still needs to go somewhere, and '-' keeps results comparable
+to the coarse-pass data already collected).
+
+This is a LOT of points (100 + 50 + 50 = 200), each needing two homing
+searches plus a move — expect a long, unattended run. Results save after
+every single point, and a rerun skips whatever's already recorded, so an
+interrupted run loses nothing.
+
+Requires: pip install pyserial (see requirements/teleop.txt)
+Run:      python teleop/tools/calibrate_steps.py
 """
 
 import json
@@ -42,7 +65,7 @@ import serial
 from serial.tools import list_ports
 
 BAUD = 115200
-OUT_PATH = Path(__file__).with_name("step_accuracy_data_v2.json")
+OUT_PATH = Path(__file__).resolve().parents[1] / "measurements" / "step_accuracy_data.json"
 
 
 def ladder(full_way, n=50):
@@ -56,10 +79,17 @@ def ladder(full_way, n=50):
     return seen
 
 
+# Full ranges — see module docstring for where each number comes from.
+# E is capped at HALF a rotation (502, not the full 1004): past that point
+# an outbound '-' move is retracing the same physical positions the long
+# way around rather than covering new ground, and it's exactly where the
+# return search's shortest-path estimate starts flip-flopping between
+# directions — capping here avoids the ambiguity outright rather than
+# trying to out-think it.
 PLAN = {
-    "D": {"-": [34, 68, 102, 136, 1530, 1564, 1598, 1632, 1666]},
-    "B": {"-": [10, 14, 17, 20, 24]},
-    "E": {"-": [50, 60, 70, 80, 90], "+": ladder(502)},
+    "D": {"+": ladder(1500), "-": ladder(1700)},
+    "B": {"-": ladder(170)},
+    "E": {"-": ladder(502)},
 }
 
 HOME_FOUND_RE = re.compile(r"\[fw\] HOME (\w) found.*steps=(-?\d+)")
@@ -91,9 +121,14 @@ def pick_port():
 
 class LineReader:
     """Wraps a serial port and hands back one complete line at a time,
-    carrying any leftover bytes forward across calls in self.buf — see
-    calibrate_steps.py for why a naive reset-every-call version silently
-    drops data."""
+    carrying any leftover bytes forward across calls in self.buf. A naive
+    version that resets its buffer on every call silently drops data
+    whenever two lines arrive in the same underlying read() — which is
+    common here, since the firmware often prints an intermediate
+    "LIMIT HIT mid-move" line immediately followed by the actual
+    "HOME <axis> found..." line with no delay between them. That was
+    exactly what caused early runs to time out waiting for a "found" line
+    that had, in fact, already arrived and been thrown away."""
 
     def __init__(self, ser):
         self.ser = ser
@@ -106,7 +141,7 @@ class LineReader:
                 line = raw.decode("ascii", "replace").strip()
                 if line:
                     return line
-                continue
+                continue  # blank line — keep looking, don't burn a retry
             if time.time() >= deadline:
                 return None
             chunk = self.ser.read(256)
@@ -120,6 +155,9 @@ def send(ser, text):
 
 
 def home(reader, axis, timeout_s):
+    """Sends HOME <axis>, waits for its completion line. Returns
+    (actual_steps, status) — status is 'found', 'already', 'failed', or
+    'timeout'."""
     send(reader.ser, f"HOME {axis}")
     deadline = time.time() + timeout_s
     while True:
@@ -138,6 +176,8 @@ def home(reader, axis, timeout_s):
 
 
 def move(reader, axis, n, timeout_s=15.0):
+    """Sends MOVE <axis><n>, waits for its completion line. Returns the
+    actual signed steps completed, or None on timeout."""
     send(reader.ser, f"MOVE {axis}{n}")
     deadline = time.time() + timeout_s
     while True:
@@ -179,7 +219,7 @@ def run_point(reader, axis, direction, magnitude):
 def main():
     port = pick_port()
     ser = serial.Serial(port, BAUD, timeout=0.2)
-    time.sleep(2.0)
+    time.sleep(2.0)  # board resets when the port opens — let it boot
     ser.reset_input_buffer()
     reader = LineReader(ser)
     print(f"Connected to {port}.")
