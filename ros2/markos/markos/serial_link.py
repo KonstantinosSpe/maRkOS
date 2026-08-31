@@ -16,7 +16,7 @@ from typing import Optional, Tuple
 try:
     import serial
 except ImportError:
-    raise SystemExit("pyserial is not installed.\n\nRun:  pip install pyserial")
+    raise SystemExit("pyserial is not installed.\n\nRun:  pip install pyserial") from None
 
 HW_BAUD = 115200
 HW_BOOT_DELAY_MS = 2000

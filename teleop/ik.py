@@ -107,8 +107,10 @@ def ik_planar(r: float, y: float, elbow: int) -> Tuple[float, float]:
     psi = math.acos(cos_psi)
     j3 = phi + psi * elbow
     j3, j5 = math.degrees(j3), math.degrees(j5)
-    while j3 > 180: j3 -= 360
-    while j3 < -180: j3 += 360
+    while j3 > 180:
+        j3 -= 360
+    while j3 < -180:
+        j3 += 360
     return j3, j5
 
 
@@ -139,5 +141,6 @@ def clamp_reach(height: float, r: float) -> float:
     r_hi = math.sqrt(hi_sq) if hi_sq > 0 else 0.0
     r_lo = math.sqrt(lo_sq) if lo_sq > 0 else 0.0
     r_lo = max(r_lo, R_FLOOR)
-    if r_hi < r_lo: r_hi = r_lo
+    if r_hi < r_lo:
+        r_hi = r_lo
     return clamp(r, r_lo, r_hi)

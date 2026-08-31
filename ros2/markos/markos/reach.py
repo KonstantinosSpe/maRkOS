@@ -23,6 +23,7 @@ from typing import Dict, List, Optional, Tuple
 from . import hw_config as cfg
 from .axis_controller import STEPS_PER_DEG
 
+
 def _model_limits(axis: str, sign: int):
     """The axis's allowed range in the model's angles: the hardware limits, mirrored if this axis turns the
     other way on the real arm than in the model."""

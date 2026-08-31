@@ -44,7 +44,7 @@ import mediapipe as mp
 try:
     from serial.tools import list_ports
 except ImportError:
-    raise SystemExit("pyserial is not installed.\n\nRun:  pip install pyserial")
+    raise SystemExit("pyserial is not installed.\n\nRun:  pip install pyserial") from None
 
 from gesture_math import (
     ENGAGE_DEADZONE,
@@ -870,7 +870,12 @@ class Mark1OS:
             L(f"REC ({len(self.rec_events)} events)", px + 14, 422, (230, 80, 80), 0.34)
         L(f"last: {self.last_intended}", px + 14, 440, (150, 170, 200), 0.30)
 
-        gtxt = "OPEN" if self.gripper_pos >= GRIP_OPEN - 1 else ("CLOSED" if self.gripper_pos <= GRIP_CLOSED + 1 else f"{self.gripper_pos:.0f}")
+        if self.gripper_pos >= GRIP_OPEN - 1:
+            gtxt = "OPEN"
+        elif self.gripper_pos <= GRIP_CLOSED + 1:
+            gtxt = "CLOSED"
+        else:
+            gtxt = f"{self.gripper_pos:.0f}"
         L(f"Gripper: {gtxt}", px + 10, h - 62, (80, 200, 120) if self.gripper_pos > GRIP_CLOSED + 1 else (200, 120, 80), 0.40)
         L("hold fist=freeze  thumb+pinky=grip", px + 10, h - 26, (60, 70, 90), 0.28)
         L("pinch thumb+index=engage, move hand=speed", px + 10, h - 10, (60, 70, 90), 0.28)
