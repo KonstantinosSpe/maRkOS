@@ -2,11 +2,9 @@
 """
 arm_ik.py -- the arm's geometry: link lengths, joint limits, and the 2-link IK
 ============================================================================
-Ported verbatim (naming/comments intact) from ik.py on the maRkOS repo's
-Reorganize branch, which was never merged/ported into the ROS2 workspace.
-Copied here rather than imported as a package so follow_palm_ros.py doesn't
-depend on ROS2 workspace sourcing being exactly right -- this file has zero
-dependencies beyond the standard library either way.
+A trimmed copy of teleop/ik.py (the link geometry and the two-link solve, without the
+gesture response curve). It is kept next to follow_palm_ros.py so that demo does not have to
+reach into the desktop app's folder; it needs nothing beyond the standard library.
 
 A quick word on the physical layout, since it explains where SHOULDER_H,
 A_LEN and B_LEN come from. Walking the real arm from the base up to the

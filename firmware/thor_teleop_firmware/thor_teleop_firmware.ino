@@ -18,7 +18,7 @@
   that guarantee has since been lifted by deliberate choice, not by
   accident. This firmware itself has no concept of "armed/disarmed": it
   will execute any MOVE D it receives exactly like MOVE A/B/E. All of that
-  caution lives on the Python side instead, in mark1os.py's hw_config.py
+  caution lives on the Python side instead, in teleop/hw_config.py
   (HW_CALIBRATED_D, which starts False) — if that ever changes, this
   firmware moves D on command with no extra gate here.
 
@@ -76,8 +76,7 @@
                  success line reports steps=<n>, the actual number of
                  steps the search took — compare that against a known
                  commanded distance to measure real step accuracy at a
-                 given point in the range (see step-accuracy-calibration
-                 branch / calibrate_steps.py).
+                 given point in the range (see teleop/tools/calibrate_steps.py).
                  D has NO working hardware limit switch (LIM_D never
                  reliably triggers) — its search and every other D move
                  (JOG, MOVE) are clamped in software instead

@@ -19,8 +19,8 @@
     2. Open Serial Monitor at 115200 baud.
     3. Trigger each of the 5 sensors one at a time, with a pause between
        each, and write down which pin number printed for which sensor.
-    4. Tell me the 5 pin numbers and which physical sensor each one is —
-       I'll wire them into thor_teleop_firmware.ino as the real homing pins.
+    4. Note the 5 pin numbers and which physical sensor each one is; those become
+       the homing pins in thor_teleop_firmware.ino.
 
   All candidate pins are read with INPUT_PULLUP (idle HIGH, LOW when
   triggered) — matches how LIM_A/B/D/E are already wired in the main

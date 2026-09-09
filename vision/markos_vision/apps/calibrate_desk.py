@@ -67,9 +67,9 @@ the laptop. The robot's axis is already known (it is built in), so all you type 
   The bottle stands to the RIGHT of the box, so u is positive and v is around 0 or negative.
   Measure to the CENTRE of the bottle's foot, with a set square against the box.
 
-  1. Stand the bottle on 6-8 spots spread over where you'll want it picked up (31-37 cm from the base axis, to the
-     right of the box): some level with the end face, some further back beside the box, some nearer to the box and
-     some farther from it.
+  1. Stand the bottle on 6-10 spots spread over where you'll want it picked up (for the 22 cm bottle the arm hovers exactly
+     over spots 26-36 cm from the base axis, to the right of the box): some level with the end face, some further back
+     beside the box, some nearer to the box and some farther from it.
   2. For each spot: wait until the bottle's foot dot is cyan and it says STILL, press c, then type
      the two distances as  u v   (e.g.  22 -22  is 22 cm right of the corner, level with the turntable).
   3. Do NOT move the laptop or the robot base while you do this.
