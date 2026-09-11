@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "markos-thor"
+version = "0.1.0"
+description = "Vision- and gesture-controlled Thor robotic arm: firmware, desktop teleoperation, ROS 2 bridge and a camera-guided bottle pick pipeline"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Konstantinos Speranski" }]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pyserial",
+]
+
+# OpenCV is an extra because the right build depends on where the code runs: the tools that open windows need the GUI build,
+# tests and servers want the headless one (the two cannot be installed side by side).
+[project.optional-dependencies]
+gui = ["opencv-python"]
+headless = ["opencv-python-headless"]
+# Bottle segmentation for the hover and calibration tools (brings its own opencv-python and PyTorch)
+yolo = ["ultralytics"]
+# Development: tests and linting (CI runs these)
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+markos-hover = "markos_vision.apps.hover:main"
+markos-calibrate-desk = "markos_vision.apps.calibrate_desk:main"
+markos-find-bottle = "markos_vision.apps.find_bottle:main"
+markos-select-stars = "markos_vision.apps.select_stars:main"
+markos-aim-probe = "markos_vision.apps.pose_probe:main"
+markos-direction-test = "markos_vision.apps.direction_test:main"
+markos-drift-test = "markos_vision.apps.drift_test:main"
+
+# Two import packages live in different folders of the repository:
+#   markos          the hardware layer, also built as the ROS 2 package in ros2/markos
+#   markos_vision   the camera pipeline in vision/
+[tool.setuptools]
+package-dir = { "markos" = "ros2/markos/markos", "markos_vision" = "vision/markos_vision" }
+packages = [
+    "markos",
+    "markos_vision",
+    "markos_vision.apps",
+    "markos_vision.geometry",
+    "markos_vision.perception",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["ros2/markos/test", "vision/tests", "teleop/tests"]
+# the desktop teleop app is a folder of flat modules (hw_config, ik, ...), not an installed package;
+# vision/tests holds helpers (ROS stubs, the hover harness) shared by several test files
+pythonpath = ["teleop", "vision/tests"]
+addopts = "-ra --import-mode=importlib"
+markers = [
+    "ros: needs a ROS 2 installation (rclpy) and is skipped without one",
+]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+extend-exclude = ["ros2/thor_urdf"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = [
+    "E741",  # single-letter names such as l and O are used for lengths and corners in the geometry code
+    "B905",  # zip() is always used on sequences of equal length here
+    "B007",  # detections are unpacked as (cx, cy, score, box, live) and only some fields are used
+]
+
+[tool.ruff.lint.per-file-ignores]
+# scripts that put a sibling module on the path or import lazily on purpose
+"vision/experiments/*" = ["E402"]
+"teleop/*" = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["markos", "markos_vision"]

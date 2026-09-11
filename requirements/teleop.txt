@@ -1,0 +1,5 @@
+# The desktop teleoperation app (teleop/mark1os.py). MediaPipe 0.10.9 needs Python 3.10 or 3.11.
+opencv-python
+mediapipe==0.10.9
+numpy
+pyserial
