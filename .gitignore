@@ -34,6 +34,9 @@ desktop.ini
 !/data/README.md
 !/data/examples/
 
+# --- Per-machine overrides for the WSL scripts (see scripts/wsl/env.sh) ---
+/scripts/wsl/local.sh
+
 # --- Desktop teleop runtime data (recorded paths, session log) ---
 /teleop/paths/
 /teleop/calibration_log.jsonl
