@@ -40,10 +40,11 @@ place, is not sent before `g`, and is not sent when the camera has moved.
 
 The ROS modules are stubbed (`vision/tests/ros_stubs.py`) when they cannot be imported, so the hover logic is still tested in CI. The one
 test that needs the real thing, `test_bridge_control`, starts the bridge in mock mode **on its own ROS domain** (77) and checks arming and
-homing through the window's control object, so it can never reach a real arm. Run it with the workspace sourced:
+homing through the window's control object, so it can never reach a real arm. `scripts/wsl/test.sh` runs the whole suite in the
+robot environment (real ROS 2, the vision virtual environment, the workspace built by `scripts/wsl/build_ros.sh`), so this test runs too:
 
 ```bash
-scripts/wsl/build_ros.sh && source scripts/wsl/env.sh && pytest -m ros
+scripts/wsl/test.sh            # from WSL; on Windows: wsl --cd <repo> -- bash scripts/wsl/test.sh
 ```
 
 ## Continuous integration
