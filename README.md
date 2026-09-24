@@ -10,10 +10,25 @@ it stands to within a centimetre, and moves the gripper over its cap.
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 <p align="center">
-  <img src="docs/images/reach-envelope.png" width="640" alt="Where the gripper can be: the reachable region of the arm, computed by the planner from the arm's real joint ranges">
-  <br><em>The region the gripper can actually reach, computed by the planner from the arm's measured joint ranges. The red marker is the
-  hover point 5 cm above the cap of a 22 cm bottle.</em>
+  <img src="docs/images/setup.jpg" width="760" alt="The Thor arm on its electronics box next to a bottle, with the laptop running the hover window">
+  <br><em>The setup: the Thor arm on its electronics box, the bottle it follows, and the laptop whose webcam is the only sensor.</em>
 </p>
+
+## In action
+
+<table>
+  <tr>
+    <td align="center" width="260"><img src="docs/images/hover-demo.gif" width="240" alt="The arm following a bottle as it is moved by hand"></td>
+    <td align="center"><img src="docs/images/hover-window.jpg" width="560" alt="The hover window: the bottle recognised, the two red stars found, and the planned joint angles"></td>
+  </tr>
+  <tr>
+    <td valign="top"><sub>The arm follows the bottle as it is moved by hand. <a href="docs/videos/hover-demo.mp4">Full clip (21 s, mp4)</a>.</sub></td>
+    <td valign="top"><sub>The hover window: the bottle recognised as the enrolled <em>boost</em> with its cap located from the YOLO outline, the two red stars on the robot's base found (green boxes), and the joint angles the planner would send. Here the bottle stands too close to the base for an exact hover, so the planner reports it would hover higher. The bridge is not armed and <code>g</code> is off: nothing moves until both are on.</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="docs/images/teleop-console.jpg" width="640" alt="The Mark1OS desktop teleoperation app"><br><sub>The desktop teleoperation app (Mark1OS): manual jog per axis, homing, path record and playback, and gesture control with a webcam.</sub></td>
+  </tr>
+</table>
 
 ## What is in here
 
@@ -52,6 +67,14 @@ flowchart LR
 The stepper motors have no position feedback, so the whole system is built around what that costs: the arm is homed at start-up, the bridge
 refuses to move it until it is homed and explicitly armed, any lost acknowledgement latches a fault, and the planner refuses joint angles
 outside the ranges measured on the real arm. [Architecture and design decisions →](docs/architecture.md)
+
+### What the arm can reach
+
+<p align="center">
+  <img src="docs/images/reach-envelope.png" width="640" alt="Where the gripper can be: the reachable region of the arm, computed by the planner from the arm's real joint ranges">
+  <br><em>The region the gripper can actually reach, computed by the planner from the arm's measured joint ranges. The red marker is the
+  hover point 5 cm above the cap of a 22 cm bottle.</em>
+</p>
 
 ## Quick start (no arm needed)
 
@@ -108,7 +131,7 @@ teleop/           desktop teleoperation app (Tkinter + MediaPipe), step-accuracy
 ros2/             colcon workspace sources: markos (bridge, planner, simulator) and thor_urdf (robot model for RViz)
 vision/           markos_vision: perception, geometry and calibration, apps; experiments/ holds earlier prototypes
 scripts/          wsl/ and windows/ launchers, plot_reach_envelope.py
-docs/             architecture, hardware, setup, operating, calibration, testing, development
+docs/             architecture, hardware, setup, operating, calibration, testing, development; images/ and videos/ hold the showcase media
 data/             per-machine calibration, enrolled bottles, models and logs (git-ignored; see data/README.md)
 ```
 
